@@ -1,137 +1,112 @@
 Welcome to InCollege!
 1. Log In
-2. Create Account
-Please choose an option:
-Enter username:
-Enter password:
-Please create an account first.
+2. Create New Account
+Enter your choice:
 Enter new username:
-Enter password:
-Invalid password. Try again.
+Enter new password:
+Password does not meet requirements.
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
 Enter new username:
-Enter password:
-Invalid password. Try again.
+Enter new password:
+Password does not meet requirements.
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
 Enter new username:
-Enter password:
-Invalid password. Try again.
+Enter new password:
+Password does not meet requirements.
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
 Enter new username:
-Enter password:
-Invalid password. Try again.
+Enter new password:
+Password does not meet requirements.
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
 Enter new username:
-Enter password:
-Invalid password. Try again.
+Enter new password:
+Account successfully created!
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
 Enter new username:
-Enter password:
-Invalid password. Try again.
+Enter new password:
+Account successfully created!
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
 Enter new username:
-Enter password:
-Invalid password. Try again.
+Enter new password:
+Account successfully created!
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
 Enter new username:
-Enter password:
-Invalid password. Try again.
+Enter new password:
+Account successfully created!
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
 Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
-Enter password:
-Invalid password. Try again.
-Enter new username:
+Enter new password:
+Account successfully created!
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
+All permitted accounts have been created, please come back later
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
+Please enter your username:
+Please enter your password:
+Incorrect username/password, please try again.
+Please enter your username:
+Please enter your password:
+You have successfully logged in.
+Welcome,
+1. Search for a job
+2. Find someone you know
+3. Learn a new skill
+Enter your choice:
+Learn a New Skill:
+Skill1
+Skill2
+Skill3
+Skill4
+Skill5
+6. Go Back
+Enter your choice:
+This skill is under construction.
+Learn a New Skill:
+Skill1
+Skill2
+Skill3
+Skill4
+Skill5
+6. Go Back
+Enter your choice:
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:

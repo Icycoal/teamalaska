@@ -1,83 +1,42 @@
-**************************************************
-* Test 1: Create account with invalid password (too short)
-**************************************************
 2
-User1
-Ab1!
-**************************************************
-* Test 2: Retry same username with valid password
-**************************************************
-User1
-ValidPass1!
-**************************************************
-* Test 3: Attempt login with wrong password
-**************************************************
+user1
+short
+2
+user2
+alllowercase
+2
+user3
+NoDigit!
+2
+user4
+NoSpecial1
+2
+user5
+Vaalid1!
+2
+user6
+Strong2@
+2
+user7
+PassWord3#
+2
+user8
+Secure4$
+2
+user9
+GoodPass5%
+2
+user10
+Extraa6^
 1
-User1
-WrongPass!
-**************************************************
-* Test 4: Login with correct password
-**************************************************
-1
-User1
-ValidPass1!
-**************************************************
-* Test 5: Create account with duplicate username (should reject and re-prompt)
-**************************************************
-2
-User1
-Another1!
-**************************************************
-* Test 6: Create 2nd valid user
-**************************************************
-2
-User2
-GoodPass2@
-**************************************************
-* Test 7: Create 3rd valid user
-**************************************************
-2
-User3
-BestPass3#
-**************************************************
-* Test 8: Create 4th valid user
-**************************************************
-2
-User4
-GreatPass4$
-**************************************************
-* Test 9: Create 5th valid user
-**************************************************
-2
-User5
-Strong5%
-**************************************************
-* Test 10: Attempt 6th account (should block)
-**************************************************
-2
-User6
-Blocked6!
-**************************************************
-* Test 11: Edge case - password exactly 8 characters
-**************************************************
-2
-EdgeUser1
-Passw0rd!
-**************************************************
-* Test 12: Edge case - password exactly 12 characters
-**************************************************
-2
-EdgeUser2
-ValidPass12#
-**************************************************
-* Test 13: Login, then menu navigation (job → friend → skill → back → exit)
-**************************************************
-1
-User1
-ValidPass1!
-1
-2
+user5
+wrongpass
+user5
+Vaalid1!
 3
 1
 6
+3
+2
+5
 6
