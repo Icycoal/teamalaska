@@ -5,11 +5,11 @@
       ENVIRONMENT DIVISION.
       INPUT-OUTPUT SECTION.
       FILE-CONTROL.
-          SELECT INPUT-FILE ASSIGN TO "./src/InCollege-Test.txt"
+          SELECT INPUT-FILE ASSIGN TO "InCollege-Test.txt"
               ORGANIZATION IS LINE SEQUENTIAL.
-          SELECT OUTPUT-FILE ASSIGN TO "./src/InCollege-Output.txt"
+          SELECT OUTPUT-FILE ASSIGN TO "InCollege-Output.txt"
               ORGANIZATION IS LINE SEQUENTIAL.
-          SELECT ACCOUNT-FILE ASSIGN TO "./src/InCollege-Accounts.txt"
+          SELECT ACCOUNT-FILE ASSIGN TO "InCollege-Accounts.txt"
               ORGANIZATION IS LINE SEQUENTIAL
               FILE STATUS IS acct-file-status.
 
