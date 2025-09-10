@@ -1,0 +1,137 @@
+Welcome to InCollege!
+1. Log In
+2. Create Account
+Please choose an option:
+Enter username:
+Enter password:
+Please create an account first.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
+Enter password:
+Invalid password. Try again.
+Enter new username:
