@@ -11,9 +11,6 @@ FILE-CONTROL.
     SELECT ACCOUNT-FILE ASSIGN TO "InCollege-Accounts.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         FILE STATUS IS acct-file-status.
-    SELECT PROFILE-FILE ASSIGN TO "InCollege-Profiles.txt"
-        ORGANIZATION IS LINE SEQUENTIAL
-        FILE STATUS IS profile-file-status.
 
 DATA DIVISION.
 FILE SECTION.
@@ -360,10 +357,128 @@ DISPLAY-MSG.
     WRITE OUT-REC.
 
 CREATE-EDIT-PROFILE.
-    MOVE "Create profile creating" TO msgBuffer
+    MOVE "--- Create/Edit Profile ---" TO msgBuffer
+    PERFORM DISPLAY-MSG
+
+    MOVE "Enter First Name:" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+    MOVE FUNCTION TRIM(IN-REC) TO first-name(loggedInUser)
+
+    MOVE "Enter Last Name:" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+    MOVE FUNCTION TRIM(IN-REC) TO last-name(loggedInUser)
+
+    MOVE "Enter University/College Attended:" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+    MOVE FUNCTION TRIM(IN-REC) TO university(loggedInUser)
+
+    MOVE "Enter Major:" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+    MOVE FUNCTION TRIM(IN-REC) TO major(loggedInUser)
+
+    MOVE "Enter Graduation Year (YYYY):" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+    IF IN-REC IS NUMERIC AND FUNCTION LENGTH(FUNCTION TRIM(IN-REC)) = 4
+        MOVE FUNCTION NUMVAL(IN-REC) TO graduation-year(loggedInUser)
+    ELSE
+        MOVE "Invalid year entered." TO msgBuffer
+        PERFORM DISPLAY-MSG
+        MOVE 0 TO graduation-year(loggedInUser)
+    END-IF
+
+    MOVE "Enter About Me (optional, max 200 chars, enter blank line to skip):" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+    MOVE FUNCTION TRIM(IN-REC) TO about-me(loggedInUser)
+
+    MOVE "Add Experience (optional, max 3 entries. Enter 'DONE' to finish):" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    PERFORM VARYING exp-idx FROM 1 BY 1 UNTIL exp-idx > 3
+        MOVE SPACES TO msgBuffer
+        STRING "Experience #" DELIMITED BY SIZE
+                exp-idx DELIMITED BY SIZE
+                " - Title:" DELIMITED BY SIZE INTO msgBuffer
+        END-STRING
+        PERFORM DISPLAY-MSG
+        READ INPUT-FILE AT END MOVE "DONE" TO IN-REC END-READ
+        IF FUNCTION TRIM(IN-REC) = "DONE"
+            MOVE SPACES TO exp-title(loggedInUser, exp-idx)
+            EXIT PERFORM
+        END-IF
+        MOVE FUNCTION TRIM(IN-REC) TO exp-title(loggedInUser, exp-idx)
+
+        MOVE SPACES TO msgBuffer
+        STRING "Experience #" DELIMITED BY SIZE
+                exp-idx DELIMITED BY SIZE
+                " - Company/Organization:" DELIMITED BY SIZE INTO msgBuffer
+        END-STRING
+        PERFORM DISPLAY-MSG
+        READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+        MOVE FUNCTION TRIM(IN-REC) TO exp-company(loggedInUser, exp-idx)
+
+        MOVE SPACES TO msgBuffer
+        STRING "Experience #" DELIMITED BY SIZE
+                exp-idx DELIMITED BY SIZE
+                " - Dates (e.g., Summer 2024):" DELIMITED BY SIZE INTO msgBuffer
+        END-STRING
+        PERFORM DISPLAY-MSG
+        READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+        MOVE FUNCTION TRIM(IN-REC) TO exp-dates(loggedInUser, exp-idx)
+
+        MOVE SPACES TO msgBuffer
+        STRING "Experience #" DELIMITED BY SIZE
+                exp-idx DELIMITED BY SIZE
+                " - Description (optional, max 100 chars, blank to skip):" DELIMITED BY SIZE INTO msgBuffer
+        END-STRING
+        PERFORM DISPLAY-MSG
+        READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+        MOVE FUNCTION TRIM(IN-REC) TO exp-desc(loggedInUser, exp-idx)
+    END-PERFORM
+
+    MOVE "Add Education (optional, max 3 entries. Enter 'DONE' to finish):" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    PERFORM VARYING edu-idx FROM 1 BY 1 UNTIL edu-idx > 3
+        MOVE SPACES TO msgBuffer
+        STRING "Education #" DELIMITED BY SIZE
+                edu-idx DELIMITED BY SIZE
+                " - Degree:" DELIMITED BY SIZE INTO msgBuffer
+        END-STRING
+        PERFORM DISPLAY-MSG
+        READ INPUT-FILE AT END MOVE "DONE" TO IN-REC END-READ
+        IF FUNCTION TRIM(IN-REC) = "DONE"
+            MOVE SPACES TO edu-degree(loggedInUser, edu-idx)
+            EXIT PERFORM
+        END-IF
+        MOVE FUNCTION TRIM(IN-REC) TO edu-degree(loggedInUser, edu-idx)
+
+        MOVE SPACES TO msgBuffer
+        STRING "Education #" DELIMITED BY SIZE
+                edu-idx DELIMITED BY SIZE
+                " - University/College:" DELIMITED BY SIZE INTO msgBuffer
+        END-STRING
+        PERFORM DISPLAY-MSG
+        READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+        MOVE FUNCTION TRIM(IN-REC) TO edu-university(loggedInUser, edu-idx)
+
+        MOVE SPACES TO msgBuffer
+        STRING "Education #" DELIMITED BY SIZE
+                edu-idx DELIMITED BY SIZE
+                " - Years Attended (e.g., 2023-2025):" DELIMITED BY SIZE INTO msgBuffer
+        END-STRING
+        PERFORM DISPLAY-MSG
+        READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+        MOVE FUNCTION TRIM(IN-REC) TO edu-years(loggedInUser, edu-idx)
+    END-PERFORM.
+
+    MOVE "Profile saved successfully!" TO msgBuffer
     PERFORM DISPLAY-MSG.
 
 VIEW-PROFILE.
     MOVE "View Profile is under construction." TO msgBuffer
     PERFORM DISPLAY-MSG.
-    
+
