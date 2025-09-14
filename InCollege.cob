@@ -281,8 +281,8 @@ LOGIN.
             PERFORM DISPLAY-MSG
             MOVE "Welcome, " TO msgBuffer
             STRING msgBuffer DELIMITED BY SIZE
-                    FUNCTION TRIM(userName) DELIMITED BY SIZE
-                    INTO msgBuffer
+                   FUNCTION TRIM(userName) DELIMITED BY SIZE
+                   INTO msgBuffer
             END-STRING
             PERFORM DISPLAY-MSG
             MOVE "Y" TO loginOk
@@ -404,8 +404,8 @@ CREATE-EDIT-PROFILE.
     PERFORM VARYING exp-idx FROM 1 BY 1 UNTIL exp-idx > 3
         MOVE SPACES TO msgBuffer
         STRING "Experience #" DELIMITED BY SIZE
-                exp-idx DELIMITED BY SIZE
-                " - Title:" DELIMITED BY SIZE INTO msgBuffer
+               exp-idx DELIMITED BY SIZE
+               " - Title:" DELIMITED BY SIZE INTO msgBuffer
         END-STRING
         PERFORM DISPLAY-MSG
         READ INPUT-FILE AT END MOVE "DONE" TO IN-REC END-READ
@@ -417,8 +417,8 @@ CREATE-EDIT-PROFILE.
 
         MOVE SPACES TO msgBuffer
         STRING "Experience #" DELIMITED BY SIZE
-                exp-idx DELIMITED BY SIZE
-                " - Company/Organization:" DELIMITED BY SIZE INTO msgBuffer
+               exp-idx DELIMITED BY SIZE
+               " - Company/Organization:" DELIMITED BY SIZE INTO msgBuffer
         END-STRING
         PERFORM DISPLAY-MSG
         READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
@@ -426,8 +426,8 @@ CREATE-EDIT-PROFILE.
 
         MOVE SPACES TO msgBuffer
         STRING "Experience #" DELIMITED BY SIZE
-                exp-idx DELIMITED BY SIZE
-                " - Dates (e.g., Summer 2024):" DELIMITED BY SIZE INTO msgBuffer
+               exp-idx DELIMITED BY SIZE
+               " - Dates (e.g., Summer 2024):" DELIMITED BY SIZE INTO msgBuffer
         END-STRING
         PERFORM DISPLAY-MSG
         READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
@@ -435,8 +435,8 @@ CREATE-EDIT-PROFILE.
 
         MOVE SPACES TO msgBuffer
         STRING "Experience #" DELIMITED BY SIZE
-                exp-idx DELIMITED BY SIZE
-                " - Description (optional, max 100 chars, blank to skip):" DELIMITED BY SIZE INTO msgBuffer
+               exp-idx DELIMITED BY SIZE
+               " - Description (optional, max 100 chars, blank to skip):" DELIMITED BY SIZE INTO msgBuffer
         END-STRING
         PERFORM DISPLAY-MSG
         READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
@@ -448,8 +448,8 @@ CREATE-EDIT-PROFILE.
     PERFORM VARYING edu-idx FROM 1 BY 1 UNTIL edu-idx > 3
         MOVE SPACES TO msgBuffer
         STRING "Education #" DELIMITED BY SIZE
-                edu-idx DELIMITED BY SIZE
-                " - Degree:" DELIMITED BY SIZE INTO msgBuffer
+               edu-idx DELIMITED BY SIZE
+               " - Degree:" DELIMITED BY SIZE INTO msgBuffer
         END-STRING
         PERFORM DISPLAY-MSG
         READ INPUT-FILE AT END MOVE "DONE" TO IN-REC END-READ
@@ -461,8 +461,8 @@ CREATE-EDIT-PROFILE.
 
         MOVE SPACES TO msgBuffer
         STRING "Education #" DELIMITED BY SIZE
-                edu-idx DELIMITED BY SIZE
-                " - University/College:" DELIMITED BY SIZE INTO msgBuffer
+               edu-idx DELIMITED BY SIZE
+               " - University/College:" DELIMITED BY SIZE INTO msgBuffer
         END-STRING
         PERFORM DISPLAY-MSG
         READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
@@ -470,13 +470,13 @@ CREATE-EDIT-PROFILE.
 
         MOVE SPACES TO msgBuffer
         STRING "Education #" DELIMITED BY SIZE
-                edu-idx DELIMITED BY SIZE
-                " - Years Attended (e.g., 2023-2025):" DELIMITED BY SIZE INTO msgBuffer
+               edu-idx DELIMITED BY SIZE
+               " - Years Attended (e.g., 2023-2025):" DELIMITED BY SIZE INTO msgBuffer
         END-STRING
         PERFORM DISPLAY-MSG
         READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
         MOVE FUNCTION TRIM(IN-REC) TO edu-years(loggedInUser, edu-idx)
-    END-PERFORM.
+    END-PERFORM
 
     MOVE "Profile saved successfully!" TO msgBuffer
     PERFORM DISPLAY-MSG.
@@ -484,4 +484,4 @@ CREATE-EDIT-PROFILE.
 VIEW-PROFILE.
     MOVE "View Profile is under construction." TO msgBuffer
     PERFORM DISPLAY-MSG.
-
+    
