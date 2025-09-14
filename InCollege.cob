@@ -415,6 +415,23 @@ CREATE-EDIT-PROFILE.
         END-IF
         MOVE FUNCTION TRIM(IN-REC) TO exp-title(loggedInUser, exp-idx)
 
+        MOVE SPACES TO msgBuffer
+        STRING "Experience #" DELIMITED BY SIZE
+               exp-idx DELIMITED BY SIZE
+               " - Company/Organization:" DELIMITED BY SIZE INTO msgBuffer
+        END-STRING
+        PERFORM DISPLAY-MSG
+        READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+        MOVE FUNCTION TRIM(IN-REC) TO exp-company(loggedInUser, exp-idx)
+
+        MOVE SPACES TO msgBuffer
+        STRING "Experience #" DELIMITED BY SIZE
+               exp-idx DELIMITED BY SIZE
+               " - Dates (e.g., Summer 2024):" DELIMITED BY SIZE INTO msgBuffer
+        END-STRING
+        PERFORM DISPLAY-MSG
+        READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+        MOVE FUNCTION TRIM(IN-REC) TO exp-dates(loggedInUser, exp-idx)
 
         MOVE SPACES TO msgBuffer
         STRING "Experience #" DELIMITED BY SIZE
