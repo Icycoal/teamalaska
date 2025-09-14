@@ -11,6 +11,9 @@ FILE-CONTROL.
     SELECT ACCOUNT-FILE ASSIGN TO "InCollege-Accounts.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         FILE STATUS IS acct-file-status.
+    SELECT PROFILE-FILE ASSIGN TO "InCollege-Profiles.txt"
+        ORGANIZATION IS LINE SEQUENTIAL
+        FILE STATUS IS profile-file-status.
 
 DATA DIVISION.
 FILE SECTION.
