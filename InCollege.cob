@@ -4,14 +4,14 @@ PROGRAM-ID. InCollege.
 ENVIRONMENT DIVISION.
 INPUT-OUTPUT SECTION.
 FILE-CONTROL.
-    SELECT INPUT-FILE ASSIGN TO "InCollege-Input.txt"
+    SELECT INPUT-FILE ASSIGN TO "./src/InCollege-Input.txt"
         ORGANIZATION IS LINE SEQUENTIAL.
-    SELECT OUTPUT-FILE ASSIGN TO "InCollege-Output.txt"
+    SELECT OUTPUT-FILE ASSIGN TO "./src/InCollege-Output.txt"
         ORGANIZATION IS LINE SEQUENTIAL.
-    SELECT ACCOUNT-FILE ASSIGN TO "InCollege-Accounts.txt"
+    SELECT ACCOUNT-FILE ASSIGN TO "./src/InCollege-Accounts.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         FILE STATUS IS acct-file-status.
-    SELECT PROFILE-FILE ASSIGN TO "InCollege-Profiles.txt"
+    SELECT PROFILE-FILE ASSIGN TO "./src/InCollege-Profiles.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         FILE STATUS IS profile-file-status.
 
@@ -482,6 +482,106 @@ CREATE-EDIT-PROFILE.
     PERFORM DISPLAY-MSG.
 
 VIEW-PROFILE.
-    MOVE "View Profile is under construction." TO msgBuffer
+    MOVE "--- Your Profile ---" TO msgBuffer
+    PERFORM DISPLAY-MSG
+
+    MOVE SPACES TO msgBuffer
+    STRING "Name: " DELIMITED BY SIZE
+           FUNCTION TRIM(first-name(loggedInUser)) DELIMITED BY SIZE
+           " " DELIMITED BY SIZE
+           FUNCTION TRIM(last-name(loggedInUser)) DELIMITED BY SIZE
+           INTO msgBuffer
+    END-STRING
+    PERFORM DISPLAY-MSG
+
+    MOVE SPACES TO msgBuffer
+    STRING "University: " DELIMITED BY SIZE
+           FUNCTION TRIM(university(loggedInUser)) DELIMITED BY SIZE
+           INTO msgBuffer
+    END-STRING
+    PERFORM DISPLAY-MSG
+
+    MOVE SPACES TO msgBuffer
+    STRING "Major: " DELIMITED BY SIZE
+           FUNCTION TRIM(major(loggedInUser)) DELIMITED BY SIZE
+           INTO msgBuffer
+    END-STRING
+    PERFORM DISPLAY-MSG
+
+    MOVE SPACES TO msgBuffer
+    STRING "Graduation Year: " DELIMITED BY SIZE
+           FUNCTION NUMVAL-C(graduation-year(loggedInUser)) DELIMITED BY SIZE
+           INTO msgBuffer
+    END-STRING
+    PERFORM DISPLAY-MSG
+
+    MOVE SPACES TO msgBuffer
+    STRING "About Me: " DELIMITED BY SIZE
+           FUNCTION TRIM(about-me(loggedInUser)) DELIMITED BY SIZE
+           INTO msgBuffer
+    END-STRING
+    PERFORM DISPLAY-MSG
+
+    MOVE "Experience:" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    PERFORM VARYING exp-idx FROM 1 BY 1 UNTIL exp-idx > 3
+        IF FUNCTION TRIM(exp-title(loggedInUser, exp-idx)) NOT = SPACES
+            MOVE SPACES TO msgBuffer
+            STRING "Title: " DELIMITED BY SIZE
+                   FUNCTION TRIM(exp-title(loggedInUser, exp-idx)) DELIMITED BY SIZE
+                   INTO msgBuffer
+            END-STRING
+            PERFORM DISPLAY-MSG
+
+            MOVE SPACES TO msgBuffer
+            STRING "Company: " DELIMITED BY SIZE
+                   FUNCTION TRIM(exp-company(loggedInUser, exp-idx)) DELIMITED BY SIZE
+                   INTO msgBuffer
+            END-STRING
+            PERFORM DISPLAY-MSG
+
+            MOVE SPACES TO msgBuffer
+            STRING "Dates: " DELIMITED BY SIZE
+                   FUNCTION TRIM(exp-dates(loggedInUser, exp-idx)) DELIMITED BY SIZE
+                   INTO msgBuffer
+            END-STRING
+            PERFORM DISPLAY-MSG
+
+            MOVE SPACES TO msgBuffer
+            STRING "Description: " DELIMITED BY SIZE
+                   FUNCTION TRIM(exp-desc(loggedInUser, exp-idx)) DELIMITED BY SIZE
+                   INTO msgBuffer
+            END-STRING
+            PERFORM DISPLAY-MSG
+        END-IF
+    END-PERFORM
+
+    MOVE "Education:" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    PERFORM VARYING edu-idx FROM 1 BY 1 UNTIL edu-idx > 3
+        IF FUNCTION TRIM(edu-degree(loggedInUser, edu-idx)) NOT = SPACES
+            MOVE SPACES TO msgBuffer
+            STRING "Degree: " DELIMITED BY SIZE
+                   FUNCTION TRIM(edu-degree(loggedInUser, edu-idx)) DELIMITED BY SIZE
+                   INTO msgBuffer
+            END-STRING
+            PERFORM DISPLAY-MSG
+
+            MOVE SPACES TO msgBuffer
+            STRING "University: " DELIMITED BY SIZE
+                   FUNCTION TRIM(edu-university(loggedInUser, edu-idx)) DELIMITED BY SIZE
+                   INTO msgBuffer
+            END-STRING
+            PERFORM DISPLAY-MSG
+
+            MOVE SPACES TO msgBuffer
+            STRING "Years: " DELIMITED BY SIZE
+                   FUNCTION TRIM(edu-years(loggedInUser, edu-idx)) DELIMITED BY SIZE
+                   INTO msgBuffer
+            END-STRING
+            PERFORM DISPLAY-MSG
+        END-IF
+    END-PERFORM
+
+    MOVE "------------------" TO msgBuffer
     PERFORM DISPLAY-MSG.
-    
