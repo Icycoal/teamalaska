@@ -53,6 +53,8 @@ WORKING-STORAGE SECTION.
 01 loggedInUser PIC 9.
 01 temp-year PIC 9(4).
 01 trimmed-input PIC X(50).
+01 short-trimmed PIC X(4).
+01 graduation-year-str PIC X(4).
 01 exp-idx PIC 9.
 01 edu-idx PIC 9.
 
@@ -386,13 +388,18 @@ CREATE-EDIT-PROFILE.
     MOVE "Enter Graduation Year (YYYY):" TO msgBuffer
     PERFORM DISPLAY-MSG
     READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
-    IF IN-REC IS NUMERIC AND FUNCTION LENGTH(FUNCTION TRIM(IN-REC)) = 4
-        MOVE FUNCTION NUMVAL(IN-REC) TO graduation-year(loggedInUser)
+    MOVE FUNCTION TRIM(IN-REC) TO trimmed-input
+    MOVE trimmed-input(1:4) TO short-trimmed
+
+    IF short-trimmed IS NUMERIC AND FUNCTION LENGTH(short-trimmed) = 4
+        MOVE FUNCTION NUMVAL(short-trimmed) TO graduation-year(loggedInUser)
     ELSE
         MOVE "Invalid year entered." TO msgBuffer
         PERFORM DISPLAY-MSG
         MOVE 0 TO graduation-year(loggedInUser)
     END-IF
+
+
 
     MOVE "Enter About Me (optional, max 200 chars, enter blank line to skip):" TO msgBuffer
     PERFORM DISPLAY-MSG
@@ -508,12 +515,14 @@ VIEW-PROFILE.
     END-STRING
     PERFORM DISPLAY-MSG
 
+    MOVE graduation-year(loggedInUser) TO graduation-year-str
     MOVE SPACES TO msgBuffer
     STRING "Graduation Year: " DELIMITED BY SIZE
-           FUNCTION NUMVAL-C(graduation-year(loggedInUser)) DELIMITED BY SIZE
+           graduation-year-str DELIMITED BY SIZE
            INTO msgBuffer
     END-STRING
     PERFORM DISPLAY-MSG
+
 
     MOVE SPACES TO msgBuffer
     STRING "About Me: " DELIMITED BY SIZE
