@@ -58,8 +58,11 @@ The project demonstrates:
 
 ```bash
 cobc -x -free InCollege.cob -o InCollege
+```
 
 2. Run program:
 
 ```bash
-./InCollege                                                      
+./InCollege   
+```     
+                                              
