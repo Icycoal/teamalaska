@@ -18,10 +18,10 @@ FILE-CONTROL.
 DATA DIVISION.
 FILE SECTION.
 FD INPUT-FILE.
-01 IN-REC PIC X(50).
+01 IN-REC PIC X(201).
 
 FD OUTPUT-FILE.
-01 OUT-REC PIC X(100).
+01 OUT-REC PIC X(250).
 
 FD ACCOUNT-FILE.
 01 ACC-REC-FILE PIC X(40).
@@ -34,7 +34,7 @@ WORKING-STORAGE SECTION.
 01 subChoice PIC 9.
 01 loginOk PIC X VALUE "N".
 01 doneFlag PIC X VALUE "N".
-01 msgBuffer PIC X(100).
+01 msgBuffer PIC X(250).
 01 userName PIC X(20).
 01 userPass PIC X(20).
 01 accountCount PIC 9 VALUE 0.
@@ -57,6 +57,7 @@ WORKING-STORAGE SECTION.
 01 graduation-year-str PIC X(4).
 01 exp-idx PIC 9.
 01 edu-idx PIC 9.
+01 EOF-INPUT-FILE PIC X VALUE "N".
 
 01 accounts.
     05 account-user OCCURS 5 TIMES PIC X(20) VALUE SPACES.
@@ -174,9 +175,15 @@ WELCOME-SCREEN.
     PERFORM DISPLAY-MSG.
 
 MAIN-MENU.
-    READ INPUT-FILE
-        AT END MOVE "1" TO IN-REC
-    END-READ
+    IF EOF-INPUT-FILE = "Y"
+        MOVE "1" TO IN-REC
+    ELSE
+        READ INPUT-FILE
+            AT END
+                MOVE "Y" TO EOF-INPUT-FILE
+                MOVE "1" TO IN-REC
+        END-READ
+    END-IF
     MOVE FUNCTION NUMVAL(IN-REC) TO mainChoice
 
     EVALUATE mainChoice
@@ -196,17 +203,29 @@ CREATE-ACCOUNT.
 
     MOVE "Enter new username:" TO msgBuffer
     PERFORM DISPLAY-MSG
-    READ INPUT-FILE
-        AT END MOVE SPACES TO userName
-        NOT AT END MOVE IN-REC TO userName
-    END-READ
+    IF EOF-INPUT-FILE = "Y"
+        MOVE SPACES TO userName
+    ELSE
+        READ INPUT-FILE
+            AT END
+                MOVE "Y" TO EOF-INPUT-FILE
+                MOVE SPACES TO userName
+            NOT AT END MOVE IN-REC TO userName
+        END-READ
+    END-IF
 
     MOVE "Enter new password:" TO msgBuffer
     PERFORM DISPLAY-MSG
-    READ INPUT-FILE
-        AT END MOVE SPACES TO userPass
-        NOT AT END MOVE IN-REC TO userPass
-    END-READ
+    IF EOF-INPUT-FILE = "Y"
+        MOVE SPACES TO userPass
+    ELSE
+        READ INPUT-FILE
+            AT END
+                MOVE "Y" TO EOF-INPUT-FILE
+                MOVE SPACES TO userPass
+            NOT AT END MOVE IN-REC TO userPass
+        END-READ
+    END-IF
 
     MOVE 0 TO passLength
     PERFORM VARYING charPos FROM 1 BY 1 UNTIL charPos > 20
@@ -255,17 +274,29 @@ LOGIN.
     PERFORM UNTIL loginOk = "Y"
         MOVE "Please enter your username:" TO msgBuffer
         PERFORM DISPLAY-MSG
-        READ INPUT-FILE
-            AT END MOVE SPACES TO userName
-            NOT AT END MOVE IN-REC TO userName
-        END-READ
+        IF EOF-INPUT-FILE = "Y"
+            MOVE SPACES TO userName
+        ELSE
+            READ INPUT-FILE
+                AT END
+                    MOVE "Y" TO EOF-INPUT-FILE
+                    MOVE SPACES TO userName
+                NOT AT END MOVE IN-REC TO userName
+            END-READ
+        END-IF
 
         MOVE "Please enter your password:" TO msgBuffer
         PERFORM DISPLAY-MSG
-        READ INPUT-FILE
-            AT END MOVE SPACES TO userPass
-            NOT AT END MOVE IN-REC TO userPass
-        END-READ
+        IF EOF-INPUT-FILE = "Y"
+            MOVE SPACES TO userPass
+        ELSE
+            READ INPUT-FILE
+                AT END
+                    MOVE "Y" TO EOF-INPUT-FILE
+                    MOVE SPACES TO userPass
+                NOT AT END MOVE IN-REC TO userPass
+            END-READ
+        END-IF
 
         MOVE "N" TO foundFlag
         PERFORM VARYING idx FROM 1 BY 1 UNTIL idx > accountCount
@@ -309,9 +340,15 @@ POST-LOGIN-MENU.
         MOVE "5. Go Back" TO msgBuffer
         PERFORM DISPLAY-MSG
 
-        READ INPUT-FILE
-            AT END MOVE "5" TO IN-REC
-        END-READ
+        IF EOF-INPUT-FILE = "Y"
+            MOVE "5" TO IN-REC
+        ELSE
+            READ INPUT-FILE
+                AT END
+                    MOVE "Y" TO EOF-INPUT-FILE
+                    MOVE "5" TO IN-REC
+            END-READ
+        END-IF
         MOVE FUNCTION NUMVAL(IN-REC) TO mainChoice
 
         EVALUATE mainChoice
@@ -343,9 +380,15 @@ SKILL-MENU.
         MOVE "Enter your choice:" TO msgBuffer
         PERFORM DISPLAY-MSG
 
-        READ INPUT-FILE
-            AT END MOVE "6" TO IN-REC
-        END-READ
+        IF EOF-INPUT-FILE = "Y"
+            MOVE "6" TO IN-REC
+        ELSE
+            READ INPUT-FILE
+                AT END
+                    MOVE "Y" TO EOF-INPUT-FILE
+                    MOVE "6" TO IN-REC
+            END-READ
+        END-IF
         MOVE FUNCTION NUMVAL(IN-REC) TO subChoice
 
         IF subChoice >= 1 AND subChoice <= 5
@@ -367,27 +410,47 @@ CREATE-EDIT-PROFILE.
 
     MOVE "Enter First Name:" TO msgBuffer
     PERFORM DISPLAY-MSG
-    READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+    IF EOF-INPUT-FILE = "Y"
+        MOVE SPACES TO IN-REC
+    ELSE
+        READ INPUT-FILE AT END MOVE "Y" TO EOF-INPUT-FILE MOVE SPACES TO IN-REC END-READ
+    END-IF
     MOVE FUNCTION TRIM(IN-REC) TO first-name(loggedInUser)
 
     MOVE "Enter Last Name:" TO msgBuffer
     PERFORM DISPLAY-MSG
-    READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+    IF EOF-INPUT-FILE = "Y"
+        MOVE SPACES TO IN-REC
+    ELSE
+        READ INPUT-FILE AT END MOVE "Y" TO EOF-INPUT-FILE MOVE SPACES TO IN-REC END-READ
+    END-IF
     MOVE FUNCTION TRIM(IN-REC) TO last-name(loggedInUser)
 
     MOVE "Enter University/College Attended:" TO msgBuffer
     PERFORM DISPLAY-MSG
-    READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+    IF EOF-INPUT-FILE = "Y"
+        MOVE SPACES TO IN-REC
+    ELSE
+        READ INPUT-FILE AT END MOVE "Y" TO EOF-INPUT-FILE MOVE SPACES TO IN-REC END-READ
+    END-IF
     MOVE FUNCTION TRIM(IN-REC) TO university(loggedInUser)
 
     MOVE "Enter Major:" TO msgBuffer
     PERFORM DISPLAY-MSG
-    READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+    IF EOF-INPUT-FILE = "Y"
+        MOVE SPACES TO IN-REC
+    ELSE
+        READ INPUT-FILE AT END MOVE "Y" TO EOF-INPUT-FILE MOVE SPACES TO IN-REC END-READ
+    END-IF
     MOVE FUNCTION TRIM(IN-REC) TO major(loggedInUser)
 
     MOVE "Enter Graduation Year (YYYY):" TO msgBuffer
     PERFORM DISPLAY-MSG
-    READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+    IF EOF-INPUT-FILE = "Y"
+        MOVE SPACES TO IN-REC
+    ELSE
+        READ INPUT-FILE AT END MOVE "Y" TO EOF-INPUT-FILE MOVE SPACES TO IN-REC END-READ
+    END-IF
     MOVE FUNCTION TRIM(IN-REC) TO trimmed-input
     MOVE trimmed-input(1:4) TO short-trimmed
 
@@ -399,11 +462,13 @@ CREATE-EDIT-PROFILE.
         MOVE 0 TO graduation-year(loggedInUser)
     END-IF
 
-
-
     MOVE "Enter About Me (optional, max 200 chars, enter blank line to skip):" TO msgBuffer
     PERFORM DISPLAY-MSG
-    READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+    IF EOF-INPUT-FILE = "Y"
+        MOVE SPACES TO IN-REC
+    ELSE
+        READ INPUT-FILE AT END MOVE "Y" TO EOF-INPUT-FILE MOVE SPACES TO IN-REC END-READ
+    END-IF
     MOVE FUNCTION TRIM(IN-REC) TO about-me(loggedInUser)
 
     MOVE "Add Experience (optional, max 3 entries. Enter 'DONE' to finish):" TO msgBuffer
@@ -415,7 +480,11 @@ CREATE-EDIT-PROFILE.
                " - Title:" DELIMITED BY SIZE INTO msgBuffer
         END-STRING
         PERFORM DISPLAY-MSG
-        READ INPUT-FILE AT END MOVE "DONE" TO IN-REC END-READ
+        IF EOF-INPUT-FILE = "Y"
+            MOVE "DONE" TO IN-REC
+        ELSE
+            READ INPUT-FILE AT END MOVE "Y" TO EOF-INPUT-FILE MOVE "DONE" TO IN-REC END-READ
+        END-IF
         IF FUNCTION TRIM(IN-REC) = "DONE"
             MOVE SPACES TO exp-title(loggedInUser, exp-idx)
             EXIT PERFORM
@@ -428,7 +497,11 @@ CREATE-EDIT-PROFILE.
                " - Company/Organization:" DELIMITED BY SIZE INTO msgBuffer
         END-STRING
         PERFORM DISPLAY-MSG
-        READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+        IF EOF-INPUT-FILE = "Y"
+            MOVE SPACES TO IN-REC
+        ELSE
+            READ INPUT-FILE AT END MOVE "Y" TO EOF-INPUT-FILE MOVE SPACES TO IN-REC END-READ
+        END-IF
         MOVE FUNCTION TRIM(IN-REC) TO exp-company(loggedInUser, exp-idx)
 
         MOVE SPACES TO msgBuffer
@@ -437,7 +510,11 @@ CREATE-EDIT-PROFILE.
                " - Dates (e.g., Summer 2024):" DELIMITED BY SIZE INTO msgBuffer
         END-STRING
         PERFORM DISPLAY-MSG
-        READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+        IF EOF-INPUT-FILE = "Y"
+            MOVE SPACES TO IN-REC
+        ELSE
+            READ INPUT-FILE AT END MOVE "Y" TO EOF-INPUT-FILE MOVE SPACES TO IN-REC END-READ
+        END-IF
         MOVE FUNCTION TRIM(IN-REC) TO exp-dates(loggedInUser, exp-idx)
 
         MOVE SPACES TO msgBuffer
@@ -446,7 +523,11 @@ CREATE-EDIT-PROFILE.
                " - Description (optional, max 100 chars, blank to skip):" DELIMITED BY SIZE INTO msgBuffer
         END-STRING
         PERFORM DISPLAY-MSG
-        READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+        IF EOF-INPUT-FILE = "Y"
+            MOVE SPACES TO IN-REC
+        ELSE
+            READ INPUT-FILE AT END MOVE "Y" TO EOF-INPUT-FILE MOVE SPACES TO IN-REC END-READ
+        END-IF
         MOVE FUNCTION TRIM(IN-REC) TO exp-desc(loggedInUser, exp-idx)
     END-PERFORM
 
@@ -459,7 +540,11 @@ CREATE-EDIT-PROFILE.
                " - Degree:" DELIMITED BY SIZE INTO msgBuffer
         END-STRING
         PERFORM DISPLAY-MSG
-        READ INPUT-FILE AT END MOVE "DONE" TO IN-REC END-READ
+        IF EOF-INPUT-FILE = "Y"
+            MOVE "DONE" TO IN-REC
+        ELSE
+            READ INPUT-FILE AT END MOVE "Y" TO EOF-INPUT-FILE MOVE "DONE" TO IN-REC END-READ
+        END-IF
         IF FUNCTION TRIM(IN-REC) = "DONE"
             MOVE SPACES TO edu-degree(loggedInUser, edu-idx)
             EXIT PERFORM
@@ -472,7 +557,11 @@ CREATE-EDIT-PROFILE.
                " - University/College:" DELIMITED BY SIZE INTO msgBuffer
         END-STRING
         PERFORM DISPLAY-MSG
-        READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+        IF EOF-INPUT-FILE = "Y"
+            MOVE SPACES TO IN-REC
+        ELSE
+            READ INPUT-FILE AT END MOVE "Y" TO EOF-INPUT-FILE MOVE SPACES TO IN-REC END-READ
+        END-IF
         MOVE FUNCTION TRIM(IN-REC) TO edu-university(loggedInUser, edu-idx)
 
         MOVE SPACES TO msgBuffer
@@ -481,7 +570,11 @@ CREATE-EDIT-PROFILE.
                " - Years Attended (e.g., 2023-2025):" DELIMITED BY SIZE INTO msgBuffer
         END-STRING
         PERFORM DISPLAY-MSG
-        READ INPUT-FILE AT END MOVE SPACES TO IN-REC END-READ
+        IF EOF-INPUT-FILE = "Y"
+            MOVE SPACES TO IN-REC
+        ELSE
+            READ INPUT-FILE AT END MOVE "Y" TO EOF-INPUT-FILE MOVE SPACES TO IN-REC END-READ
+        END-IF
         MOVE FUNCTION TRIM(IN-REC) TO edu-years(loggedInUser, edu-idx)
     END-PERFORM
 
@@ -523,12 +616,12 @@ VIEW-PROFILE.
     END-STRING
     PERFORM DISPLAY-MSG
 
+    *> Display About Me - use separate MOVE instead of STRING
+    MOVE "About Me: " TO msgBuffer
+    PERFORM DISPLAY-MSG
 
-    MOVE SPACES TO msgBuffer
-    STRING "About Me: " DELIMITED BY SIZE
-           FUNCTION TRIM(about-me(loggedInUser)) DELIMITED BY SIZE
-           INTO msgBuffer
-    END-STRING
+    *> Display the full about-me text directly
+    MOVE about-me(loggedInUser) TO msgBuffer
     PERFORM DISPLAY-MSG
 
     MOVE "Experience:" TO msgBuffer
