@@ -1,1 +1,59 @@
-Epic #1	Scrum Master:	Jyothik Addala	Coder #1:	Awwab Ahmed	Coder #2:	Jawad Ahmed	Tester #1:	Sama Ahmed	Tester #2:	Maksud Akramov		Epic #2	Scrum Master:		Coder #1:		Coder #2:		Tester #1:		Tester #2:			Epic #3	Scrum Master:		Coder #1:		Coder #2:		Tester #1:		Tester #2:			Epic #4	Scrum Master:		Coder #1:		Coder #2:		Tester #1:		Tester #2:			Epic #5	Scrum Master:		Coder #1:		Coder #2:		Tester #1:		Tester #2:			Epic #6	Scrum Master:		Coder #1:		Coder #2:		Tester #1:		Tester #2:			Epic #7	Scrum Master:		Coder #1:		Coder #2:		Tester #1:		Tester #2:			Epic #8	Scrum Master:		Coder #1:		Coder #2:		Tester #1:		Tester #2:			Epic #9	Scrum Master:		Coder #1:		Coder #2:		Tester #1:		Tester #2:			Epic #10	Scrum Master:		Coder #1:		Coder #2:		Tester #1:		Tester #2:	
+Epic #1	Scrum Master:	Jyothik Addala
+	Coder #1:	Awwab Ahmed
+	Coder #2:	Jawad Ahmed
+	Tester #1:	Sama Ahmed
+	Tester #2:	Maksud Akramov
+		
+Epic #2	Scrum Master: Maksud Akramov
+	Coder #1:	Jyothik Addala
+	Coder #2:	Awwab Ahmed
+	Tester #1:	Jawad Ahmed
+	Tester #2:	Sama Ahmed
+		
+Epic #3	Scrum Master:	
+	Coder #1:	
+	Coder #2:	
+	Tester #1:	
+	Tester #2:	
+		
+Epic #4	Scrum Master:	
+	Coder #1:	
+	Coder #2:	
+	Tester #1:	
+	Tester #2:	
+		
+Epic #5	Scrum Master:	
+	Coder #1:	
+	Coder #2:	
+	Tester #1:	
+	Tester #2:	
+		
+Epic #6	Scrum Master:	
+	Coder #1:	
+	Coder #2:	
+	Tester #1:	
+	Tester #2:	
+		
+Epic #7	Scrum Master:	
+	Coder #1:	
+	Coder #2:	
+	Tester #1:	
+	Tester #2:	
+		
+Epic #8	Scrum Master:	
+	Coder #1:	
+	Coder #2:	
+	Tester #1:	
+	Tester #2:	
+		
+Epic #9	Scrum Master:	
+	Coder #1:	
+	Coder #2:	
+	Tester #1:	
+	Tester #2:	
+		
+Epic #10	Scrum Master:	
+	Coder #1:	
+	Coder #2:	
+	Tester #1:	
+	Tester #2:	
