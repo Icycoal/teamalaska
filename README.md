@@ -1,16 +1,6 @@
-# InCollege - User Authentication System (COBOL)
-
-## Overview
-This is the **InCollege Project: Week 3 Deliverable - Log In, Part 1**, a console-based COBOL application that simulates a basic **user authentication system**. Users can create new accounts, log in, and navigate initial post-login options.  
-
-The project demonstrates:
-- File-based input/output handling
-- Account persistence
-- Password validation
-- Menu-driven user interface
+# InCollege - (COBOL)
 
 
----
 
 ## How to Compile and Run
 
