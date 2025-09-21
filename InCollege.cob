@@ -265,6 +265,7 @@ CREATE-ACCOUNT.
     MOVE userPass TO account-pass(accountCount)
     MOVE "Account successfully created!" TO msgBuffer
     PERFORM DISPLAY-MSG.
+    PERFORM SAVE-ACCOUNTS.
 
 LOGIN.
     MOVE "N" TO loginOk
@@ -500,6 +501,7 @@ CREATE-EDIT-PROFILE.
 
     MOVE "Profile saved successfully!" TO msgBuffer
     PERFORM DISPLAY-MSG.
+    PERFORM SAVE-PROFILES.
 
 VIEW-PROFILE.
     MOVE "--- Your Profile ---" TO msgBuffer
