@@ -331,7 +331,6 @@ POST-LOGIN-MENU.
             WHEN 2
                 PERFORM VIEW-PROFILE
             WHEN 3
-                PERFORM SEARCH-USER
             WHEN 4
                 PERFORM SKILL-MENU
             WHEN 5
