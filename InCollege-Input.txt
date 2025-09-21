@@ -1,5 +1,5 @@
 2
-johndoe
+johndoe  
 P@ssw0rd1!
 1
 johndoe
@@ -20,5 +20,6 @@ Bachelor of Science
 Example University
 2021-2025
 DONE
-2
+3
+Mary Major
 5
