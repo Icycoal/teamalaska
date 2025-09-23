@@ -510,9 +510,11 @@ VIEW-PROFILE.
     PERFORM DISPLAY-GENERIC-PROFILE.
 
 SEARCH-USER.
-    MOVE "--- Find Someone You Know ---" TO msgBuffer
+    MOVE "--- Find Someone You Know ---" 
+        TO msgBuffer
     PERFORM DISPLAY-MSG
-    MOVE "Enter the full name of the person you are looking for:"
+
+    MOVE "Enter the full name of the person you are looking for:" 
         TO msgBuffer
     PERFORM DISPLAY-MSG
 
@@ -521,28 +523,33 @@ SEARCH-USER.
 
     MOVE "N" TO search-found-flag
     MOVE 0 TO ws-display-idx
-    PERFORM VARYING search-idx FROM 1 BY 1
-        UNTIL search-idx > accountCount OR search-found-flag = "Y"
 
+    PERFORM VARYING search-idx FROM 1 BY 1
+        UNTIL search-idx > accountCount 
+           OR search-found-flag = "Y"
+
+    
         MOVE SPACES TO ws-full-name
         STRING FUNCTION TRIM(first-name(search-idx)) DELIMITED BY SIZE
-               " " DELIMITED BY SIZE
+               " "                              DELIMITED BY SIZE
                FUNCTION TRIM(last-name(search-idx)) DELIMITED BY SIZE
                INTO ws-full-name
         END-STRING
-
+        
         IF FUNCTION TRIM(ws-search-name) = FUNCTION TRIM(ws-full-name)
             MOVE "Y" TO search-found-flag
             MOVE search-idx TO ws-display-idx
         END-IF
-    END-PERFORM
+    END-PERFORM.
 
-    IF search-found-flag = "Y"
-        PERFORM DISPLAY-GENERIC-PROFILE
-    ELSE
-        MOVE "No one by that name could be found." TO msgBuffer
-        PERFORM DISPLAY-MSG
-    END-IF.
+    EVALUATE TRUE
+        WHEN search-found-flag = "Y"
+            PERFORM DISPLAY-GENERIC-PROFILE
+        WHEN OTHER
+            MOVE "No one by that name could be found." TO msgBuffer
+            PERFORM DISPLAY-MSG
+    END-EVALUATE.
+
 
 DISPLAY-GENERIC-PROFILE.
     IF FUNCTION TRIM(first-name(ws-display-idx)) NOT = SPACES
