@@ -14,9 +14,6 @@ FILE-CONTROL.
     SELECT PROFILE-FILE ASSIGN TO "InCollege-Profiles.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         FILE STATUS IS profile-file-status.
-    SELECT CONNECTION-FILE ASSIGN TO "InCollege-Connections.txt"
-        ORGANIZATION IS LINE SEQUENTIAL
-        FILE STATUS IS conn-file-status.
 
 DATA DIVISION.
 FILE SECTION.
@@ -31,9 +28,6 @@ FD ACCOUNT-FILE.
 
 FD PROFILE-FILE.
 01 PROF-REC-FILE PIC X(1550).
-
-FD CONNECTION-FILE.
-01 CONN-REC-FILE PIC X(60).
 
 WORKING-STORAGE SECTION.
 01 mainChoice PIC 9.
@@ -54,7 +48,6 @@ WORKING-STORAGE SECTION.
 01 hasSpecial PIC X.
 01 acct-file-status PIC XX.
 01 profile-file-status PIC XX.
-01 conn-file-status PIC XX.
 01 trimmedUser PIC X(20).
 01 trimmedPass PIC X(20).
 01 loggedInUser PIC 9.
@@ -71,15 +64,6 @@ WORKING-STORAGE SECTION.
 01 search-idx           PIC 9.
 01 search-found-flag    PIC X.
 01 debug-input PIC X(201).
-01 connectionCount PIC 99 VALUE 0.
-01 conn-idx PIC 99.
-01 conn-sender PIC X(20).
-01 conn-recipient PIC X(20).
-01 conn-status PIC X(10).
-01 request-exists-flag PIC X.
-01 already-connected-flag PIC X.
-01 send-request-choice PIC 9.
-01 pending-count PIC 99.
 
 01 accounts.
     05 account-user OCCURS 5 TIMES PIC X(20) VALUE SPACES.
@@ -106,12 +90,6 @@ WORKING-STORAGE SECTION.
 01 skillList.
     05 skillName OCCURS 5 TIMES PIC X(20) VALUE SPACES.
 
-01 connection-requests.
-    05 connection-entry OCCURS 50 TIMES.
-        10 sender-username PIC X(20).
-        10 recipient-username PIC X(20).
-        10 request-status PIC X(10).
-
 PROCEDURE DIVISION.
 START-PROGRAM.
     OPEN INPUT INPUT-FILE
@@ -130,14 +108,6 @@ START-PROGRAM.
         PERFORM LOAD-PROFILES
     END-IF
 
-    OPEN INPUT CONNECTION-FILE
-    IF conn-file-status = "35"
-        MOVE 0 TO connectionCount
-        PERFORM INITIALIZE-CONNECTIONS
-    ELSE
-        PERFORM LOAD-CONNECTIONS
-    END-IF
-
     PERFORM SETUP-SKILLS
     PERFORM WELCOME-SCREEN
 
@@ -145,20 +115,15 @@ START-PROGRAM.
 
     PERFORM SAVE-ACCOUNTS
     PERFORM SAVE-PROFILES
-    PERFORM SAVE-CONNECTIONS
 
     CLOSE INPUT-FILE
     CLOSE OUTPUT-FILE
     CLOSE ACCOUNT-FILE
     CLOSE PROFILE-FILE
-    CLOSE CONNECTION-FILE
     STOP RUN.
 
 INITIALIZE-PROFILES.
     MOVE ALL SPACES TO user-profiles.
-
-INITIALIZE-CONNECTIONS.
-    MOVE ALL SPACES TO connection-requests.
 
 LOAD-ACCOUNTS.
     MOVE 0 TO accountCount
@@ -181,19 +146,6 @@ LOAD-PROFILES.
         END-READ
     END-PERFORM.
 
-LOAD-CONNECTIONS.
-    MOVE 0 TO connectionCount
-    PERFORM VARYING conn-idx FROM 1 BY 1 UNTIL conn-idx > 50
-        READ CONNECTION-FILE
-            AT END EXIT PERFORM
-            NOT AT END
-                ADD 1 TO connectionCount
-                MOVE CONN-REC-FILE(1:20) TO sender-username(conn-idx)
-                MOVE CONN-REC-FILE(21:20) TO recipient-username(conn-idx)
-                MOVE CONN-REC-FILE(41:10) TO request-status(conn-idx)
-        END-READ
-    END-PERFORM.
-
 SAVE-ACCOUNTS.
     OPEN OUTPUT ACCOUNT-FILE
     PERFORM VARYING idx FROM 1 BY 1 UNTIL idx > accountCount
@@ -210,16 +162,6 @@ SAVE-PROFILES.
         WRITE PROF-REC-FILE
     END-PERFORM
     CLOSE PROFILE-FILE.
-
-SAVE-CONNECTIONS.
-    OPEN OUTPUT CONNECTION-FILE
-    PERFORM VARYING conn-idx FROM 1 BY 1 UNTIL conn-idx > connectionCount
-        MOVE sender-username(conn-idx) TO CONN-REC-FILE(1:20)
-        MOVE recipient-username(conn-idx) TO CONN-REC-FILE(21:20)
-        MOVE request-status(conn-idx) TO CONN-REC-FILE(41:10)
-        WRITE CONN-REC-FILE
-    END-PERFORM
-    CLOSE CONNECTION-FILE.
 
 SETUP-SKILLS.
     MOVE "Skill1" TO skillName(1)
@@ -378,9 +320,7 @@ POST-LOGIN-MENU.
         PERFORM DISPLAY-MSG
         MOVE "4. Learn a New Skill" TO msgBuffer
         PERFORM DISPLAY-MSG
-        MOVE "5. View My Pending Connection Requests" TO msgBuffer
-        PERFORM DISPLAY-MSG
-        MOVE "6. Go Back" TO msgBuffer
+        MOVE "5. Go Back" TO msgBuffer
         PERFORM DISPLAY-MSG
 
         PERFORM READ-INPUT-SAFELY
@@ -396,8 +336,6 @@ POST-LOGIN-MENU.
             WHEN 4
                 PERFORM SKILL-MENU
             WHEN 5
-                PERFORM VIEW-PENDING-REQUESTS
-            WHEN 6
                 MOVE "Y" TO doneFlag
         END-EVALUATE
     END-PERFORM.
@@ -607,109 +545,11 @@ SEARCH-USER.
     EVALUATE TRUE
         WHEN search-found-flag = "Y"
             PERFORM DISPLAY-GENERIC-PROFILE
-            *> Only offer to send connection request if not viewing own profile
-            IF ws-display-idx NOT = loggedInUser
-                PERFORM OFFER-CONNECTION-REQUEST
-            END-IF
         WHEN OTHER
             MOVE "No one by that name could be found." TO msgBuffer
             PERFORM DISPLAY-MSG
     END-EVALUATE.
 
-OFFER-CONNECTION-REQUEST.
-    *> Check if already connected or request pending
-    PERFORM CHECK-CONNECTION-STATUS
-
-    EVALUATE TRUE
-        WHEN already-connected-flag = "Y"
-            MOVE "You are already connected with this user." TO msgBuffer
-            PERFORM DISPLAY-MSG
-        WHEN request-exists-flag = "Y"
-            MOVE "This user has already sent you a connection request." TO msgBuffer
-            PERFORM DISPLAY-MSG
-        WHEN OTHER
-            MOVE "1. Send Connection Request" TO msgBuffer
-            PERFORM DISPLAY-MSG
-            MOVE "2. Go Back" TO msgBuffer
-            PERFORM DISPLAY-MSG
-            MOVE "Enter your choice:" TO msgBuffer
-            PERFORM DISPLAY-MSG
-
-            PERFORM READ-INPUT-SAFELY
-            MOVE FUNCTION NUMVAL(IN-REC) TO send-request-choice
-
-            IF send-request-choice = 1
-                PERFORM SEND-CONNECTION-REQUEST
-            END-IF
-    END-EVALUATE.
-
-CHECK-CONNECTION-STATUS.
-    MOVE "N" TO already-connected-flag
-    MOVE "N" TO request-exists-flag
-
-    PERFORM VARYING conn-idx FROM 1 BY 1 UNTIL conn-idx > connectionCount
-        *> Check if already connected (request-status = "CONNECTED")
-        IF (sender-username(conn-idx) = FUNCTION TRIM(account-user(loggedInUser))
-            AND recipient-username(conn-idx) = FUNCTION TRIM(account-user(ws-display-idx))
-            AND request-status(conn-idx) = "CONNECTED")
-        OR (sender-username(conn-idx) = FUNCTION TRIM(account-user(ws-display-idx))
-            AND recipient-username(conn-idx) = FUNCTION TRIM(account-user(loggedInUser))
-            AND request-status(conn-idx) = "CONNECTED")
-            MOVE "Y" TO already-connected-flag
-        END-IF
-
-        *> Check if pending request exists from the target user to logged in user
-        IF sender-username(conn-idx) = FUNCTION TRIM(account-user(ws-display-idx))
-            AND recipient-username(conn-idx) = FUNCTION TRIM(account-user(loggedInUser))
-            AND request-status(conn-idx) = "PENDING"
-            MOVE "Y" TO request-exists-flag
-        END-IF
-
-        *> Check if logged in user already sent request to target user
-        IF sender-username(conn-idx) = FUNCTION TRIM(account-user(loggedInUser))
-            AND recipient-username(conn-idx) = FUNCTION TRIM(account-user(ws-display-idx))
-            AND request-status(conn-idx) = "PENDING"
-            MOVE "Y" TO already-connected-flag  *> Treat as "already connected" for UI purposes
-        END-IF
-    END-PERFORM.
-
-SEND-CONNECTION-REQUEST.
-    ADD 1 TO connectionCount
-    MOVE FUNCTION TRIM(account-user(loggedInUser)) TO sender-username(connectionCount)
-    MOVE FUNCTION TRIM(account-user(ws-display-idx)) TO recipient-username(connectionCount)
-    MOVE "PENDING" TO request-status(connectionCount)
-
-    MOVE "Connection request sent successfully!" TO msgBuffer
-    PERFORM DISPLAY-MSG
-    
-    PERFORM SAVE-CONNECTIONS.
-
-VIEW-PENDING-REQUESTS.
-    MOVE "--- Your Pending Connection Requests ---" TO msgBuffer
-    PERFORM DISPLAY-MSG
-
-    MOVE 0 TO pending-count
-
-    PERFORM VARYING conn-idx FROM 1 BY 1 UNTIL conn-idx > connectionCount
-        IF recipient-username(conn-idx) = FUNCTION TRIM(account-user(loggedInUser))
-            AND request-status(conn-idx) = "PENDING"
-            ADD 1 TO pending-count
-            MOVE SPACES TO msgBuffer
-            STRING "Connection request from: " DELIMITED BY SIZE
-                   FUNCTION TRIM(sender-username(conn-idx)) DELIMITED BY SIZE
-                   INTO msgBuffer
-            END-STRING
-            PERFORM DISPLAY-MSG
-        END-IF
-    END-PERFORM
-
-    IF pending-count = 0
-        MOVE "You have no pending connection requests." TO msgBuffer
-        PERFORM DISPLAY-MSG
-    END-IF
-
-    MOVE "------------------" TO msgBuffer
-    PERFORM DISPLAY-MSG.
 
 DISPLAY-GENERIC-PROFILE.
     IF FUNCTION TRIM(first-name(ws-display-idx)) NOT = SPACES
