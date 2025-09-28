@@ -840,3 +840,4 @@ DISPLAY-GENERIC-PROFILE.
 
     MOVE "------------------" TO msgBuffer
     PERFORM DISPLAY-MSG.
+    
