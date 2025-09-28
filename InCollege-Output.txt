@@ -2,21 +2,13 @@ Welcome to InCollege!
 1. Log In
 2. Create New Account
 Enter your choice:
-All permitted accounts have been created, please come back later
+Enter new username:
+Enter new password:
+Account successfully created!
 Welcome to InCollege!
 1. Log In
 2. Create New Account
 Enter your choice:
-Welcome to InCollege!
-1. Log In
-2. Create New Account
-Enter your choice:
-Please enter your username:
-Please enter your password:
-Incorrect username/password, please try again.
-Please enter your username:
-Please enter your password:
-Incorrect username/password, please try again.
 Please enter your username:
 Please enter your password:
 You have successfully logged in.
@@ -25,8 +17,7 @@ Welcome, johndoe!
 2. View My Profile
 3. Search for User
 4. Learn a New Skill
-5. View My Pending Connection Requests
-6. Go Back
+5. Go Back
 --- Create/Edit Profile ---
 Enter First Name:
 Enter Last Name:
@@ -50,68 +41,15 @@ Profile saved successfully!
 2. View My Profile
 3. Search for User
 4. Learn a New Skill
-5. View My Pending Connection Requests
-6. Go Back
+5. Go Back
 --- Find Someone You Know ---
 Enter the full name of the person you are looking for:
-Name: Mary Major
-University: City College
-Major: Electrical Engineering
-Graduation Year: 2026
-About Me:
-    Passionate about robotics and AI.
-Experience:
-  Title: Business Intern
-  Company: Finance Company
-  Dates: Summer 2023
-  Description: MAMMA MIA.
-
-Education:
-------------------
-1. Send Connection Request
-2. Go Back
-Enter your choice:
-Connection request sent successfully!
+No one by that name could be found.
 1. Create/Edit My Profile
 2. View My Profile
 3. Search for User
 4. Learn a New Skill
-5. View My Pending Connection Requests
-6. Go Back
---- Your Profile ---
-Name: John Doe
-University: Example University
-Major: Computer Science
-Graduation Year: 2025
-About Me:
-Enthusiastic developer always learning new things.
-Experience:
-  Title: Software Intern
-  Company: Tech Corp
-  Dates: Summer 2024
-  Description: Developed tools for internal testing.
-
-  Title: 2
-  Company: testuser
-  Dates: MyP@ssw0rd3!
-  Description: 1
-
-Education:
-  Degree: Bachelor of Science
-  University: Example University
-  Years: 2021-2025
-
-  Degree: Computer Science
-  University: 2025
-  Years: Updated profile information.
-
-------------------
-1. Create/Edit My Profile
-2. View My Profile
-3. Search for User
-4. Learn a New Skill
-5. View My Pending Connection Requests
-6. Go Back
+5. Go Back
 Welcome to InCollege!
 1. Log In
 2. Create New Account
