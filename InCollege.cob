@@ -36,16 +36,22 @@ FD PROFILE-FILE.
 01 PROF-REC-FILE PIC X(1550).
 
 FD CONNECTION-FILE.
-01 CONN-REC-FILE PIC X(3).
+01 CONN-REC-FILE.
+    05 CONN-USER1-FILE PIC X(20).
+    05 CONN-USER2-FILE PIC X(20).
+    05 CONN-STATUS-FILE PIC X.
 
 FD REQUEST-FILE.
-01 REQ-REC-FILE PIC X(2).
+01 REQ-REC-FILE.
+    05 REQ-SENDER-FILE   PIC X(20).
+    05 REQ-RECEIVER-FILE PIC X(20).
 
 WORKING-STORAGE SECTION.
 01 mainChoice PIC 9.
 01 subChoice PIC 9.
 01 loginOk PIC X VALUE "N".
-01 doneFlag PIC X VALUE "N".
+01 programDoneFlag    PIC X VALUE "N".
+01 postLoginDoneFlag  PIC X VALUE "N".
 01 msgBuffer PIC X(250).
 01 userName PIC X(20).
 01 userPass PIC X(20).
@@ -110,8 +116,8 @@ WORKING-STORAGE SECTION.
 
 01 connection-data.
     05 connection-record OCCURS 25 TIMES.
-        10 conn-user1 PIC 9.
-        10 conn-user2 PIC 9.
+        10 conn-user1 PIC X(20).
+        10 conn-user2 PIC X(20).
         10 conn-status PIC X.
            88 conn-pending VALUE "P".
            88 conn-accepted VALUE "A".
@@ -120,8 +126,8 @@ WORKING-STORAGE SECTION.
 
 01 request-data.
     05 request-record OCCURS 25 TIMES.
-        10 req-sender PIC 9.
-        10 req-receiver PIC 9.
+        10 req-sender   PIC X(20).
+        10 req-receiver PIC X(20).
 
 01 request-count PIC 99 VALUE 0.
 
@@ -163,8 +169,8 @@ START-PROGRAM.
     PERFORM SETUP-SKILLS
     PERFORM WELCOME-SCREEN
 
-    MOVE "N" TO doneFlag
-    PERFORM MAIN-MENU UNTIL doneFlag = "Y"
+    MOVE "N" TO programDoneFlag
+    PERFORM MAIN-MENU UNTIL programDoneFlag = "Y"
 
     PERFORM SAVE-ACCOUNTS
     PERFORM SAVE-PROFILES
@@ -210,9 +216,9 @@ LOAD-CONNECTIONS.
             AT END EXIT PERFORM
             NOT AT END
                 ADD 1 TO connection-count
-                MOVE CONN-REC-FILE(1:1) TO conn-user1(conn-idx)
-                MOVE CONN-REC-FILE(2:1) TO conn-user2(conn-idx)
-                MOVE CONN-REC-FILE(3:1) TO conn-status(conn-idx)
+                MOVE CONN-USER1-FILE  TO conn-user1(conn-idx)
+                MOVE CONN-USER2-FILE  TO conn-user2(conn-idx)
+                MOVE CONN-STATUS-FILE TO conn-status(conn-idx)
         END-READ
     END-PERFORM.
 
@@ -223,8 +229,8 @@ LOAD-REQUESTS.
             AT END EXIT PERFORM
             NOT AT END
                 ADD 1 TO request-count
-                MOVE REQ-REC-FILE(1:1) TO req-sender(conn-idx)
-                MOVE REQ-REC-FILE(2:1) TO req-receiver(conn-idx)
+                MOVE REQ-SENDER-FILE   TO req-sender(conn-idx)
+                MOVE REQ-RECEIVER-FILE TO req-receiver(conn-idx)
         END-READ
     END-PERFORM.
 
@@ -253,20 +259,21 @@ SAVE-CONNECTIONS.
     CLOSE CONNECTION-FILE
     OPEN OUTPUT CONNECTION-FILE
     PERFORM VARYING conn-idx FROM 1 BY 1 UNTIL conn-idx > connection-count
-        MOVE conn-user1(conn-idx) TO CONN-REC-FILE(1:1)
-        MOVE conn-user2(conn-idx) TO CONN-REC-FILE(2:1)
-        MOVE conn-status(conn-idx) TO CONN-REC-FILE(3:1)
+        MOVE conn-user1(conn-idx) TO CONN-USER1-FILE
+        MOVE conn-user2(conn-idx) TO CONN-USER2-FILE
+        MOVE conn-status(conn-idx) TO CONN-STATUS-FILE
         WRITE CONN-REC-FILE
     END-PERFORM
     CLOSE CONNECTION-FILE
     OPEN INPUT CONNECTION-FILE.
 
+
 SAVE-REQUESTS.
     CLOSE REQUEST-FILE
     OPEN OUTPUT REQUEST-FILE
     PERFORM VARYING conn-idx FROM 1 BY 1 UNTIL conn-idx > request-count
-        MOVE req-sender(conn-idx) TO REQ-REC-FILE(1:1)
-        MOVE req-receiver(conn-idx) TO REQ-REC-FILE(2:1)
+        MOVE req-sender(conn-idx)   TO REQ-SENDER-FILE
+        MOVE req-receiver(conn-idx) TO REQ-RECEIVER-FILE
         WRITE REQ-REC-FILE
     END-PERFORM
     CLOSE REQUEST-FILE
@@ -290,19 +297,15 @@ WELCOME-SCREEN.
     PERFORM DISPLAY-MSG.
 
 READ-INPUT-SAFELY.
-    IF EOF-INPUT-FILE = "Y"
-        MOVE SPACES TO IN-REC
-    ELSE
-        READ INPUT-FILE
-            AT END
-                MOVE "Y" TO EOF-INPUT-FILE
-                MOVE SPACES TO IN-REC
-            NOT AT END
-                MOVE IN-REC TO debug-input
-                *> Uncomment next line for debugging
-                *> DISPLAY "DEBUG: Read input: [" debug-input "]"
-        END-READ
-    END-IF.
+    READ INPUT-FILE
+        AT END
+            MOVE "Y" TO EOF-INPUT-FILE
+            MOVE "0" TO IN-REC
+        NOT AT END
+            MOVE IN-REC TO debug-input
+            *> Uncomment next line for debugging
+            *> DISPLAY "DEBUG: Read input: [" debug-input "]"
+    END-READ.
 
 MAIN-MENU.
     PERFORM READ-INPUT-SAFELY
@@ -314,10 +317,10 @@ MAIN-MENU.
         WHEN 2
             PERFORM CREATE-ACCOUNT
         WHEN OTHER
-            MOVE "Y" TO doneFlag
+            MOVE "Y" TO programDoneFlag
     END-EVALUATE
     
-    IF doneFlag NOT = "Y"
+    IF programDoneFlag NOT = "Y"
         PERFORM WELCOME-SCREEN
     END-IF.
 
@@ -377,6 +380,8 @@ CREATE-ACCOUNT.
     ADD 1 TO accountCount
     MOVE userName TO account-user(accountCount)
     MOVE userPass TO account-pass(accountCount)
+    
+    
     MOVE "Account successfully created!" TO msgBuffer
     PERFORM DISPLAY-MSG
     PERFORM SAVE-ACCOUNTS.
@@ -424,8 +429,8 @@ LOGIN.
     END-PERFORM.
 
 POST-LOGIN-MENU.
-    MOVE "N" TO doneFlag
-    PERFORM UNTIL doneFlag = "Y"
+    MOVE "N" TO postLoginDoneFlag
+    PERFORM UNTIL postLoginDoneFlag = "Y"
         PERFORM CHECK-PENDING-REQUESTS
         
         MOVE "1. Create/Edit My Profile" TO msgBuffer
@@ -456,7 +461,7 @@ POST-LOGIN-MENU.
             WHEN 5
                 PERFORM SKILL-MENU
             WHEN 6
-                MOVE "Y" TO doneFlag
+                MOVE "Y" TO postLoginDoneFlag
         END-EVALUATE
     END-PERFORM.
 
@@ -488,26 +493,12 @@ VIEW-PENDING-REQUESTS.
     
     MOVE 0 TO pending-count
     PERFORM VARYING conn-idx FROM 1 BY 1 UNTIL conn-idx > request-count
-        IF req-receiver(conn-idx) = loggedInUser
+        IF req-receiver(conn-idx) = account-user(loggedInUser)
             ADD 1 TO pending-count
-            
-            MOVE SPACES TO ws-full-name
-            STRING FUNCTION TRIM(first-name(req-sender(conn-idx))) 
-                   DELIMITED BY SIZE
-                   " " DELIMITED BY SIZE
-                   FUNCTION TRIM(last-name(req-sender(conn-idx))) 
-                   DELIMITED BY SIZE
-                   INTO ws-full-name
-            END-STRING
-            
             MOVE SPACES TO msgBuffer
             STRING pending-count DELIMITED BY SIZE
-                   ". " DELIMITED BY SIZE
-                   FUNCTION TRIM(ws-full-name) DELIMITED BY SIZE
-                   " (Username: " DELIMITED BY SIZE
-                   FUNCTION TRIM(account-user(req-sender(conn-idx))) 
-                   DELIMITED BY SIZE
-                   ")" DELIMITED BY SIZE
+                   ". From: " DELIMITED BY SIZE
+                   FUNCTION TRIM(req-sender(conn-idx)) DELIMITED BY SIZE
                    INTO msgBuffer
             END-STRING
             PERFORM DISPLAY-MSG
@@ -518,20 +509,20 @@ VIEW-PENDING-REQUESTS.
         MOVE "You have no pending connection requests." TO msgBuffer
         PERFORM DISPLAY-MSG
     END-IF
-    
     MOVE "--------------------------------------" TO msgBuffer
     PERFORM DISPLAY-MSG.
 
+
 SKILL-MENU.
-    MOVE "N" TO doneFlag
-    PERFORM UNTIL doneFlag = "Y"
+    MOVE "N" TO postLoginDoneFlag
+    PERFORM UNTIL postLoginDoneFlag = "Y"
         MOVE "Learn a New Skill:" TO msgBuffer
         PERFORM DISPLAY-MSG
         PERFORM VARYING subChoice FROM 1 BY 1 UNTIL subChoice > 5
             MOVE skillName(subChoice) TO msgBuffer
             PERFORM DISPLAY-MSG
         END-PERFORM
-        MOVE "6. Go Back" TO msgBuffer
+        MOVE "7. Go Back" TO msgBuffer
         PERFORM DISPLAY-MSG
         MOVE "Enter your choice:" TO msgBuffer
         PERFORM DISPLAY-MSG
@@ -543,7 +534,7 @@ SKILL-MENU.
             MOVE "This skill is under construction." TO msgBuffer
             PERFORM DISPLAY-MSG
         ELSE
-            MOVE "Y" TO doneFlag
+            MOVE "Y" TO postLoginDoneFlag
         END-IF
     END-PERFORM.
 
@@ -747,8 +738,8 @@ SEND-CONNECTION-REQUEST.
         UNTIL conn-check-idx > request-count
         
         *> Check if already sent request
-        IF req-sender(conn-check-idx) = loggedInUser AND 
-           req-receiver(conn-check-idx) = ws-display-idx
+        IF req-sender(conn-check-idx) = account-user(loggedInUser) AND 
+           req-receiver(conn-check-idx) = account-user(ws-display-idx)
             MOVE "You have already sent a connection request to this user." TO msgBuffer
             PERFORM DISPLAY-MSG
             MOVE "N" TO can-send-request
@@ -756,8 +747,8 @@ SEND-CONNECTION-REQUEST.
         END-IF
         
         *> Check if other user already sent request
-        IF req-sender(conn-check-idx) = ws-display-idx AND 
-           req-receiver(conn-check-idx) = loggedInUser
+        IF req-sender(conn-check-idx) = account-user(ws-display-idx) AND 
+           req-receiver(conn-check-idx) = account-user(loggedInUser)
             MOVE "This user has already sent you a connection request." TO msgBuffer
             PERFORM DISPLAY-MSG
             MOVE "N" TO can-send-request
@@ -770,11 +761,11 @@ SEND-CONNECTION-REQUEST.
         PERFORM VARYING conn-check-idx FROM 1 BY 1 
             UNTIL conn-check-idx > connection-count
             
-            IF (conn-user1(conn-check-idx) = loggedInUser AND 
-                conn-user2(conn-check-idx) = ws-display-idx AND
+            IF (conn-user1(conn-check-idx) = account-user(loggedInUser) AND 
+                conn-user2(conn-check-idx) = account-user(ws-display-idx) AND
                 conn-status(conn-check-idx) = "A") OR
-               (conn-user1(conn-check-idx) = ws-display-idx AND 
-                conn-user2(conn-check-idx) = loggedInUser AND
+               (conn-user1(conn-check-idx) = account-user(ws-display-idx) AND 
+                conn-user2(conn-check-idx) = account-user(loggedInUser) AND
                 conn-status(conn-check-idx) = "A")
                 MOVE "You are already connected with this user." TO msgBuffer
                 PERFORM DISPLAY-MSG
@@ -787,8 +778,8 @@ SEND-CONNECTION-REQUEST.
     IF can-send-request = "Y"
         IF request-count < 25
             ADD 1 TO request-count
-            MOVE loggedInUser TO req-sender(request-count)
-            MOVE ws-display-idx TO req-receiver(request-count)
+            MOVE account-user(loggedInUser) TO req-sender(request-count)
+            MOVE account-user(ws-display-idx) TO req-receiver(request-count)
             
             MOVE "Connection request sent successfully!" TO msgBuffer
             PERFORM DISPLAY-MSG
@@ -798,6 +789,7 @@ SEND-CONNECTION-REQUEST.
             PERFORM DISPLAY-MSG
         END-IF
     END-IF.
+
 
 DISPLAY-GENERIC-PROFILE.
     IF FUNCTION TRIM(first-name(ws-display-idx)) NOT = SPACES

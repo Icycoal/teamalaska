@@ -16,6 +16,13 @@ Welcome to InCollege!
 1. Log In
 2. Create New Account
 Enter your choice:
+Enter new username:
+Enter new password:
+Account successfully created!
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
 Please enter your username:
 Please enter your password:
 You have successfully logged in.
@@ -35,15 +42,8 @@ Enter Graduation Year (YYYY):
 Enter About Me (optional, max 200 chars, enter blank line to skip):
 Add Experience (optional, max 3 entries. Enter 'DONE' to finish):
 Experience #1 - Title:
-Experience #1 - Company/Organization:
-Experience #1 - Dates (e.g., Summer 2024):
-Experience #1 - Description (optional, max 100 chars, blank to skip):
-Experience #2 - Title:
 Add Education (optional, max 3 entries. Enter 'DONE' to finish):
 Education #1 - Degree:
-Education #1 - University/College:
-Education #1 - Years Attended (e.g., 2023-2025):
-Education #2 - Degree:
 Profile saved successfully!
 1. Create/Edit My Profile
 2. View My Profile
@@ -51,3 +51,234 @@ Profile saved successfully!
 4. View My Pending Connection Requests
 5. Learn a New Skill
 6. Go Back
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
+Please enter your username:
+Please enter your password:
+You have successfully logged in.
+Welcome, bob!
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for User
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. Go Back
+--- Create/Edit Profile ---
+Enter First Name:
+Enter Last Name:
+Enter University/College Attended:
+Enter Major:
+Enter Graduation Year (YYYY):
+Enter About Me (optional, max 200 chars, enter blank line to skip):
+Add Experience (optional, max 3 entries. Enter 'DONE' to finish):
+Experience #1 - Title:
+Add Education (optional, max 3 entries. Enter 'DONE' to finish):
+Education #1 - Degree:
+Profile saved successfully!
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for User
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. Go Back
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
+Please enter your username:
+Please enter your password:
+You have successfully logged in.
+Welcome, charlie!
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for User
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. Go Back
+--- Create/Edit Profile ---
+Enter First Name:
+Enter Last Name:
+Enter University/College Attended:
+Enter Major:
+Enter Graduation Year (YYYY):
+Enter About Me (optional, max 200 chars, enter blank line to skip):
+Add Experience (optional, max 3 entries. Enter 'DONE' to finish):
+Experience #1 - Title:
+Add Education (optional, max 3 entries. Enter 'DONE' to finish):
+Education #1 - Degree:
+Profile saved successfully!
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for User
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. Go Back
+--- Find Someone You Know ---
+Enter the full name of the person you are looking for:
+Name: Alice Wonder
+University: MIT
+Major: Computer Science
+Graduation Year: 2025
+About Me:
+AI researcher
+Experience:
+Education:
+------------------
+Would you like to send a connection request? (Y/N):
+Connection request sent successfully!
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for User
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. Go Back
+--- Find Someone You Know ---
+Enter the full name of the person you are looking for:
+Name: Alice Wonder
+University: MIT
+Major: Computer Science
+Graduation Year: 2025
+About Me:
+AI researcher
+Experience:
+Education:
+------------------
+Would you like to send a connection request? (Y/N):
+You have already sent a connection request to this user.
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for User
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. Go Back
+--- Find Someone You Know ---
+Enter the full name of the person you are looking for:
+No one by that name could be found.
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for User
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. Go Back
+--- My Pending Connection Requests ---
+You have no pending connection requests.
+--------------------------------------
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for User
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. Go Back
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
+Please enter your username:
+Please enter your password:
+You have successfully logged in.
+Welcome, alice!
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for User
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. Go Back
+--- My Pending Connection Requests ---
+01. From: charlie
+--------------------------------------
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for User
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. Go Back
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
+Please enter your username:
+Please enter your password:
+You have successfully logged in.
+Welcome, bob!
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for User
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. Go Back
+--- Find Someone You Know ---
+Enter the full name of the person you are looking for:
+Name: Alice Wonder
+University: MIT
+Major: Computer Science
+Graduation Year: 2025
+About Me:
+AI researcher
+Experience:
+Education:
+------------------
+Would you like to send a connection request? (Y/N):
+Connection request sent successfully!
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for User
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. Go Back
+--- Find Someone You Know ---
+Enter the full name of the person you are looking for:
+Name: Charlie Brown
+University: Harvard
+Major: Business
+Graduation Year: 2024
+About Me:
+Entrepreneur
+Experience:
+Education:
+------------------
+Would you like to send a connection request? (Y/N):
+Connection request sent successfully!
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for User
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. Go Back
+--- My Pending Connection Requests ---
+You have no pending connection requests.
+--------------------------------------
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for User
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. Go Back
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
+Please enter your username:
+Please enter your password:
+You have successfully logged in.
+Welcome, charlie!
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for User
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. Go Back
+--- My Pending Connection Requests ---
+01. From: bob
+--------------------------------------
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for User
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. Go Back
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:

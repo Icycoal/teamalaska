@@ -1,2 +1,3 @@
 alice               Pass123!
 bob                 Secure1@
+charlie             Test456#

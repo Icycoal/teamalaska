@@ -4,6 +4,9 @@ Pass123!
 2
 bob
 Secure1@
+2
+charlie
+Test456#
 1
 alice
 Pass123!
@@ -13,15 +16,8 @@ Wonder
 MIT
 Computer Science
 2025
-Love coding and AI research.
-Software Intern
-Google
-Summer 2024
-Worked on machine learning projects.
+AI researcher
 DONE
-BS Computer Science
-MIT
-2021-2025
 DONE
 6
 1
@@ -31,19 +27,52 @@ Secure1@
 Bob
 Builder
 Stanford
-Mechanical Engineering
+Engineering
 2026
-Passionate about robotics and design.
-Research Assistant
-Stanford Robotics Lab
-Fall 2024
-Designed autonomous robot prototypes.
+Robotics enthusiast
 DONE
-Bachelor of Engineering
-Stanford University
-2022-2026
+DONE
+6
+1
+charlie
+Test456#
+1
+Charlie
+Brown
+Harvard
+Business
+2024
+Entrepreneur
+DONE
 DONE
 3
 Alice Wonder
 Y
+3
+Alice Wonder
+Y
+3
+NonExistent User
+4
+6
+1
+alice
+Pass123!
+4
+6
+1
+bob
+Secure1@
+3
+Alice Wonder
+Y
+3
+Charlie Brown
+Y
+4
+6
+1
+charlie
+Test456#
+4
 6
