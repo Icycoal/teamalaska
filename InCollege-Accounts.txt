@@ -1,2 +1,2 @@
-user1               Pass123!
-user2               Pass456@
+alice               Pass123!
+bob                 Secure1@

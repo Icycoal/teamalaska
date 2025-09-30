@@ -19,12 +19,13 @@ Enter your choice:
 Please enter your username:
 Please enter your password:
 You have successfully logged in.
-Welcome, user1!
+Welcome, alice!
 1. Create/Edit My Profile
 2. View My Profile
 3. Search for User
-4. Learn a New Skill
-5. Go Back
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. Go Back
 --- Create/Edit Profile ---
 Enter First Name:
 Enter Last Name:
@@ -47,59 +48,6 @@ Profile saved successfully!
 1. Create/Edit My Profile
 2. View My Profile
 3. Search for User
-4. Learn a New Skill
-5. Go Back
---- Your Profile ---
-Name: John Doe
-University: University of Tampa
-Major: Computer Science
-Graduation Year: 2025
-About Me:
-I am a software engineering student passionate about coding.
-Experience:
-  Title: Software Engineer Intern
-  Company: Tech Corp
-  Dates: Summer 2024
-  Description: Developed web applications using React and Node.js
-
-Education:
-  Degree: Bachelor of Science
-  University: University of Tampa
-  Years: 2021-2025
-
-------------------
-1. Create/Edit My Profile
-2. View My Profile
-3. Search for User
-4. Learn a New Skill
-5. Go Back
---- Find Someone You Know ---
-Enter the full name of the person you are looking for:
-Name: John Doe
-University: University of Tampa
-Major: Computer Science
-Graduation Year: 2025
-About Me:
-I am a software engineering student passionate about coding.
-Experience:
-  Title: Software Engineer Intern
-  Company: Tech Corp
-  Dates: Summer 2024
-  Description: Developed web applications using React and Node.js
-
-Education:
-  Degree: Bachelor of Science
-  University: University of Tampa
-  Years: 2021-2025
-
-------------------
-1. Create/Edit My Profile
-2. View My Profile
-3. Search for User
-4. Learn a New Skill
-5. Go Back
-1. Create/Edit My Profile
-2. View My Profile
-3. Search for User
-4. Learn a New Skill
-5. Go Back
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. Go Back

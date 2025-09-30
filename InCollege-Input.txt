@@ -1,94 +1,49 @@
 2
-user1
+alice
 Pass123!
 2
-user2
-Pass456@
+bob
+Secure1@
 1
-user1
+alice
 Pass123!
-1
-John
-Doe
-University of Tampa
-Computer Science
-2025
-I am a software engineering student passionate about coding.
-Software Engineer Intern
-Tech Corp
-Summer 2024
-Developed web applications using React and Node.js
-DONE
-Bachelor of Science
-University of Tampa
-2021-2025
-DONE
-2
-3
-John Doe
-Y
-5
-1
-user2
-Pass456@
-1
-Jane
-Smith
-Florida State University
-Business Administration
-2026
-Aspiring entrepreneur with a passion for innovation.
-Marketing Intern
-StartupXYZ
-Fall 2023
-Managed social media campaigns and analytics
-DONE
-Bachelor of Business
-Florida State University
-2022-2026
-DONE
-2
-3
-John Doe
-Y
-5
-2
-user3
-Secure1#
-1
-user1
-Pass123!
-3
-Jane Smith
-Y
-3
-John Doe
-N
-5
-1
-user3
-Secure1#
 1
 Alice
-Johnson
-University of Miami
-Data Science
-2024
-Data enthusiast and machine learning practitioner.
-Data Analyst
-Analytics Inc
-Spring 2023
-Built predictive models for customer behavior
-Research Assistant
-UM Research Lab
-2022-2023
-Conducted research on AI algorithms
+Wonder
+MIT
+Computer Science
+2025
+Love coding and AI research.
+Software Intern
+Google
+Summer 2024
+Worked on machine learning projects.
 DONE
-Master of Science
-University of Miami
-2022-2024
+BS Computer Science
+MIT
+2021-2025
+DONE
+6
+1
+bob
+Secure1@
+1
+Bob
+Builder
+Stanford
+Mechanical Engineering
+2026
+Passionate about robotics and design.
+Research Assistant
+Stanford Robotics Lab
+Fall 2024
+Designed autonomous robot prototypes.
+DONE
+Bachelor of Engineering
+Stanford University
+2022-2026
 DONE
 3
-Jane Smith
+Alice Wonder
 Y
-5
+6

@@ -17,6 +17,9 @@ FILE-CONTROL.
     SELECT CONNECTION-FILE ASSIGN TO "InCollege-Connections.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         FILE STATUS IS conn-file-status.
+    SELECT REQUEST-FILE ASSIGN TO "InCollege-Requests.txt"
+        ORGANIZATION IS LINE SEQUENTIAL
+        FILE STATUS IS request-file-status.
 
 DATA DIVISION.
 FILE SECTION.
@@ -34,6 +37,9 @@ FD PROFILE-FILE.
 
 FD CONNECTION-FILE.
 01 CONN-REC-FILE PIC X(3).
+
+FD REQUEST-FILE.
+01 REQ-REC-FILE PIC X(2).
 
 WORKING-STORAGE SECTION.
 01 mainChoice PIC 9.
@@ -55,6 +61,7 @@ WORKING-STORAGE SECTION.
 01 acct-file-status PIC XX.
 01 profile-file-status PIC XX.
 01 conn-file-status PIC XX.
+01 request-file-status PIC XX.
 01 trimmedUser PIC X(20).
 01 trimmedPass PIC X(20).
 01 loggedInUser PIC 9.
@@ -77,6 +84,7 @@ WORKING-STORAGE SECTION.
 01 user2-id PIC 9.
 01 conn-status-check PIC X.
 01 can-send-request PIC X.
+01 pending-count PIC 99.
 
 01 accounts.
     05 account-user OCCURS 5 TIMES PIC X(20) VALUE SPACES.
@@ -110,6 +118,13 @@ WORKING-STORAGE SECTION.
 
 01 connection-count PIC 99 VALUE 0.
 
+01 request-data.
+    05 request-record OCCURS 25 TIMES.
+        10 req-sender PIC 9.
+        10 req-receiver PIC 9.
+
+01 request-count PIC 99 VALUE 0.
+
 01 skillList.
     05 skillName OCCURS 5 TIMES PIC X(20) VALUE SPACES.
 
@@ -138,6 +153,13 @@ START-PROGRAM.
         PERFORM LOAD-CONNECTIONS
     END-IF
 
+    OPEN INPUT REQUEST-FILE
+    IF request-file-status = "35"
+        MOVE 0 TO request-count
+    ELSE
+        PERFORM LOAD-REQUESTS
+    END-IF
+
     PERFORM SETUP-SKILLS
     PERFORM WELCOME-SCREEN
 
@@ -147,12 +169,14 @@ START-PROGRAM.
     PERFORM SAVE-ACCOUNTS
     PERFORM SAVE-PROFILES
     PERFORM SAVE-CONNECTIONS
+    PERFORM SAVE-REQUESTS
 
     CLOSE INPUT-FILE
     CLOSE OUTPUT-FILE
     CLOSE ACCOUNT-FILE
     CLOSE PROFILE-FILE
     CLOSE CONNECTION-FILE
+    CLOSE REQUEST-FILE
     STOP RUN.
 
 INITIALIZE-PROFILES.
@@ -192,6 +216,18 @@ LOAD-CONNECTIONS.
         END-READ
     END-PERFORM.
 
+LOAD-REQUESTS.
+    MOVE 0 TO request-count
+    PERFORM VARYING conn-idx FROM 1 BY 1 UNTIL conn-idx > 25
+        READ REQUEST-FILE
+            AT END EXIT PERFORM
+            NOT AT END
+                ADD 1 TO request-count
+                MOVE REQ-REC-FILE(1:1) TO req-sender(conn-idx)
+                MOVE REQ-REC-FILE(2:1) TO req-receiver(conn-idx)
+        END-READ
+    END-PERFORM.
+
 SAVE-ACCOUNTS.
     CLOSE ACCOUNT-FILE
     OPEN OUTPUT ACCOUNT-FILE
@@ -224,6 +260,17 @@ SAVE-CONNECTIONS.
     END-PERFORM
     CLOSE CONNECTION-FILE
     OPEN INPUT CONNECTION-FILE.
+
+SAVE-REQUESTS.
+    CLOSE REQUEST-FILE
+    OPEN OUTPUT REQUEST-FILE
+    PERFORM VARYING conn-idx FROM 1 BY 1 UNTIL conn-idx > request-count
+        MOVE req-sender(conn-idx) TO REQ-REC-FILE(1:1)
+        MOVE req-receiver(conn-idx) TO REQ-REC-FILE(2:1)
+        WRITE REQ-REC-FILE
+    END-PERFORM
+    CLOSE REQUEST-FILE
+    OPEN INPUT REQUEST-FILE.
 
 SETUP-SKILLS.
     MOVE "Skill1" TO skillName(1)
@@ -379,15 +426,19 @@ LOGIN.
 POST-LOGIN-MENU.
     MOVE "N" TO doneFlag
     PERFORM UNTIL doneFlag = "Y"
+        PERFORM CHECK-PENDING-REQUESTS
+        
         MOVE "1. Create/Edit My Profile" TO msgBuffer
         PERFORM DISPLAY-MSG
         MOVE "2. View My Profile" TO msgBuffer
         PERFORM DISPLAY-MSG
         MOVE "3. Search for User" TO msgBuffer
         PERFORM DISPLAY-MSG
-        MOVE "4. Learn a New Skill" TO msgBuffer
+        MOVE "4. View My Pending Connection Requests" TO msgBuffer
         PERFORM DISPLAY-MSG
-        MOVE "5. Go Back" TO msgBuffer
+        MOVE "5. Learn a New Skill" TO msgBuffer
+        PERFORM DISPLAY-MSG
+        MOVE "6. Go Back" TO msgBuffer
         PERFORM DISPLAY-MSG
 
         PERFORM READ-INPUT-SAFELY
@@ -401,11 +452,75 @@ POST-LOGIN-MENU.
             WHEN 3
                 PERFORM SEARCH-USER
             WHEN 4
-                PERFORM SKILL-MENU
+                PERFORM VIEW-PENDING-REQUESTS
             WHEN 5
+                PERFORM SKILL-MENU
+            WHEN 6
                 MOVE "Y" TO doneFlag
         END-EVALUATE
     END-PERFORM.
+
+CHECK-PENDING-REQUESTS.
+    MOVE 0 TO pending-count
+    PERFORM VARYING conn-idx FROM 1 BY 1 UNTIL conn-idx > request-count
+        IF req-receiver(conn-idx) = loggedInUser
+            ADD 1 TO pending-count
+        END-IF
+    END-PERFORM
+    
+    IF pending-count > 0
+        MOVE "========================================" TO msgBuffer
+        PERFORM DISPLAY-MSG
+        MOVE SPACES TO msgBuffer
+        STRING "You have " DELIMITED BY SIZE
+               pending-count DELIMITED BY SIZE
+               " pending connection request(s)" DELIMITED BY SIZE
+               INTO msgBuffer
+        END-STRING
+        PERFORM DISPLAY-MSG
+        MOVE "========================================" TO msgBuffer
+        PERFORM DISPLAY-MSG
+    END-IF.
+
+VIEW-PENDING-REQUESTS.
+    MOVE "--- My Pending Connection Requests ---" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    
+    MOVE 0 TO pending-count
+    PERFORM VARYING conn-idx FROM 1 BY 1 UNTIL conn-idx > request-count
+        IF req-receiver(conn-idx) = loggedInUser
+            ADD 1 TO pending-count
+            
+            MOVE SPACES TO ws-full-name
+            STRING FUNCTION TRIM(first-name(req-sender(conn-idx))) 
+                   DELIMITED BY SIZE
+                   " " DELIMITED BY SIZE
+                   FUNCTION TRIM(last-name(req-sender(conn-idx))) 
+                   DELIMITED BY SIZE
+                   INTO ws-full-name
+            END-STRING
+            
+            MOVE SPACES TO msgBuffer
+            STRING pending-count DELIMITED BY SIZE
+                   ". " DELIMITED BY SIZE
+                   FUNCTION TRIM(ws-full-name) DELIMITED BY SIZE
+                   " (Username: " DELIMITED BY SIZE
+                   FUNCTION TRIM(account-user(req-sender(conn-idx))) 
+                   DELIMITED BY SIZE
+                   ")" DELIMITED BY SIZE
+                   INTO msgBuffer
+            END-STRING
+            PERFORM DISPLAY-MSG
+        END-IF
+    END-PERFORM
+    
+    IF pending-count = 0
+        MOVE "You have no pending connection requests." TO msgBuffer
+        PERFORM DISPLAY-MSG
+    END-IF
+    
+    MOVE "--------------------------------------" TO msgBuffer
+    PERFORM DISPLAY-MSG.
 
 SKILL-MENU.
     MOVE "N" TO doneFlag
@@ -627,47 +742,59 @@ OFFER-CONNECTION-REQUEST.
 SEND-CONNECTION-REQUEST.
     MOVE "Y" TO can-send-request
     
+    *> Check in requests file for pending requests
     PERFORM VARYING conn-check-idx FROM 1 BY 1 
-        UNTIL conn-check-idx > connection-count
+        UNTIL conn-check-idx > request-count
         
-        IF (conn-user1(conn-check-idx) = loggedInUser AND 
-            conn-user2(conn-check-idx) = ws-display-idx) OR
-           (conn-user1(conn-check-idx) = ws-display-idx AND 
-            conn-user2(conn-check-idx) = loggedInUser)
+        *> Check if already sent request
+        IF req-sender(conn-check-idx) = loggedInUser AND 
+           req-receiver(conn-check-idx) = ws-display-idx
+            MOVE "You have already sent a connection request to this user." TO msgBuffer
+            PERFORM DISPLAY-MSG
+            MOVE "N" TO can-send-request
+            EXIT PERFORM
+        END-IF
+        
+        *> Check if other user already sent request
+        IF req-sender(conn-check-idx) = ws-display-idx AND 
+           req-receiver(conn-check-idx) = loggedInUser
+            MOVE "This user has already sent you a connection request." TO msgBuffer
+            PERFORM DISPLAY-MSG
+            MOVE "N" TO can-send-request
+            EXIT PERFORM
+        END-IF
+    END-PERFORM
+    
+    *> Check in connections file for accepted connections
+    IF can-send-request = "Y"
+        PERFORM VARYING conn-check-idx FROM 1 BY 1 
+            UNTIL conn-check-idx > connection-count
             
-            IF conn-status(conn-check-idx) = "A"
+            IF (conn-user1(conn-check-idx) = loggedInUser AND 
+                conn-user2(conn-check-idx) = ws-display-idx AND
+                conn-status(conn-check-idx) = "A") OR
+               (conn-user1(conn-check-idx) = ws-display-idx AND 
+                conn-user2(conn-check-idx) = loggedInUser AND
+                conn-status(conn-check-idx) = "A")
                 MOVE "You are already connected with this user." TO msgBuffer
                 PERFORM DISPLAY-MSG
                 MOVE "N" TO can-send-request
                 EXIT PERFORM
-            ELSE IF conn-status(conn-check-idx) = "P"
-                IF conn-user1(conn-check-idx) = ws-display-idx
-                    MOVE "This user has already sent you a connection request." TO msgBuffer
-                    PERFORM DISPLAY-MSG
-                    MOVE "N" TO can-send-request
-                    EXIT PERFORM
-                ELSE
-                    MOVE "You have already sent a connection request to this user." TO msgBuffer
-                    PERFORM DISPLAY-MSG
-                    MOVE "N" TO can-send-request
-                    EXIT PERFORM
-                END-IF
             END-IF
-        END-IF
-    END-PERFORM
+        END-PERFORM
+    END-IF
     
     IF can-send-request = "Y"
-        IF connection-count < 25
-            ADD 1 TO connection-count
-            MOVE loggedInUser TO conn-user1(connection-count)
-            MOVE ws-display-idx TO conn-user2(connection-count)
-            MOVE "P" TO conn-status(connection-count)
+        IF request-count < 25
+            ADD 1 TO request-count
+            MOVE loggedInUser TO req-sender(request-count)
+            MOVE ws-display-idx TO req-receiver(request-count)
             
             MOVE "Connection request sent successfully!" TO msgBuffer
             PERFORM DISPLAY-MSG
-            PERFORM SAVE-CONNECTIONS
+            PERFORM SAVE-REQUESTS
         ELSE
-            MOVE "Connection limit reached. Cannot send more requests." TO msgBuffer
+            MOVE "Request limit reached. Cannot send more requests." TO msgBuffer
             PERFORM DISPLAY-MSG
         END-IF
     END-IF.
@@ -801,4 +928,3 @@ DISPLAY-GENERIC-PROFILE.
 
     MOVE "------------------" TO msgBuffer
     PERFORM DISPLAY-MSG.
-    
