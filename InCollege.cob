@@ -14,6 +14,9 @@ FILE-CONTROL.
     SELECT PROFILE-FILE ASSIGN TO "InCollege-Profiles.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         FILE STATUS IS profile-file-status.
+    SELECT CONNECTION-FILE ASSIGN TO "InCollege-Connections.txt"
+        ORGANIZATION IS LINE SEQUENTIAL
+        FILE STATUS IS conn-file-status.
 
 DATA DIVISION.
 FILE SECTION.
@@ -28,6 +31,9 @@ FD ACCOUNT-FILE.
 
 FD PROFILE-FILE.
 01 PROF-REC-FILE PIC X(1550).
+
+FD CONNECTION-FILE.
+01 CONN-REC-FILE PIC X(3).
 
 WORKING-STORAGE SECTION.
 01 mainChoice PIC 9.
@@ -48,6 +54,7 @@ WORKING-STORAGE SECTION.
 01 hasSpecial PIC X.
 01 acct-file-status PIC XX.
 01 profile-file-status PIC XX.
+01 conn-file-status PIC XX.
 01 trimmedUser PIC X(20).
 01 trimmedPass PIC X(20).
 01 loggedInUser PIC 9.
@@ -64,6 +71,12 @@ WORKING-STORAGE SECTION.
 01 search-idx           PIC 9.
 01 search-found-flag    PIC X.
 01 debug-input PIC X(201).
+01 conn-idx PIC 99.
+01 conn-check-idx PIC 99.
+01 user1-id PIC 9.
+01 user2-id PIC 9.
+01 conn-status-check PIC X.
+01 can-send-request PIC X.
 
 01 accounts.
     05 account-user OCCURS 5 TIMES PIC X(20) VALUE SPACES.
@@ -87,6 +100,16 @@ WORKING-STORAGE SECTION.
             15 edu-university PIC X(50).
             15 edu-years PIC X(50).
 
+01 connection-data.
+    05 connection-record OCCURS 25 TIMES.
+        10 conn-user1 PIC 9.
+        10 conn-user2 PIC 9.
+        10 conn-status PIC X.
+           88 conn-pending VALUE "P".
+           88 conn-accepted VALUE "A".
+
+01 connection-count PIC 99 VALUE 0.
+
 01 skillList.
     05 skillName OCCURS 5 TIMES PIC X(20) VALUE SPACES.
 
@@ -108,18 +131,28 @@ START-PROGRAM.
         PERFORM LOAD-PROFILES
     END-IF
 
+    OPEN INPUT CONNECTION-FILE
+    IF conn-file-status = "35"
+        MOVE 0 TO connection-count
+    ELSE
+        PERFORM LOAD-CONNECTIONS
+    END-IF
+
     PERFORM SETUP-SKILLS
     PERFORM WELCOME-SCREEN
 
+    MOVE "N" TO doneFlag
     PERFORM MAIN-MENU UNTIL doneFlag = "Y"
 
     PERFORM SAVE-ACCOUNTS
     PERFORM SAVE-PROFILES
+    PERFORM SAVE-CONNECTIONS
 
     CLOSE INPUT-FILE
     CLOSE OUTPUT-FILE
     CLOSE ACCOUNT-FILE
     CLOSE PROFILE-FILE
+    CLOSE CONNECTION-FILE
     STOP RUN.
 
 INITIALIZE-PROFILES.
@@ -146,22 +179,51 @@ LOAD-PROFILES.
         END-READ
     END-PERFORM.
 
+LOAD-CONNECTIONS.
+    MOVE 0 TO connection-count
+    PERFORM VARYING conn-idx FROM 1 BY 1 UNTIL conn-idx > 25
+        READ CONNECTION-FILE
+            AT END EXIT PERFORM
+            NOT AT END
+                ADD 1 TO connection-count
+                MOVE CONN-REC-FILE(1:1) TO conn-user1(conn-idx)
+                MOVE CONN-REC-FILE(2:1) TO conn-user2(conn-idx)
+                MOVE CONN-REC-FILE(3:1) TO conn-status(conn-idx)
+        END-READ
+    END-PERFORM.
+
 SAVE-ACCOUNTS.
+    CLOSE ACCOUNT-FILE
     OPEN OUTPUT ACCOUNT-FILE
     PERFORM VARYING idx FROM 1 BY 1 UNTIL idx > accountCount
         MOVE account-user(idx) TO ACC-REC-FILE(1:20)
         MOVE account-pass(idx) TO ACC-REC-FILE(21:20)
         WRITE ACC-REC-FILE
     END-PERFORM
-    CLOSE ACCOUNT-FILE.
+    CLOSE ACCOUNT-FILE
+    OPEN INPUT ACCOUNT-FILE.
 
 SAVE-PROFILES.
+    CLOSE PROFILE-FILE
     OPEN OUTPUT PROFILE-FILE
     PERFORM VARYING idx FROM 1 BY 1 UNTIL idx > accountCount
         MOVE user-profile(idx) TO PROF-REC-FILE
         WRITE PROF-REC-FILE
     END-PERFORM
-    CLOSE PROFILE-FILE.
+    CLOSE PROFILE-FILE
+    OPEN INPUT PROFILE-FILE.
+
+SAVE-CONNECTIONS.
+    CLOSE CONNECTION-FILE
+    OPEN OUTPUT CONNECTION-FILE
+    PERFORM VARYING conn-idx FROM 1 BY 1 UNTIL conn-idx > connection-count
+        MOVE conn-user1(conn-idx) TO CONN-REC-FILE(1:1)
+        MOVE conn-user2(conn-idx) TO CONN-REC-FILE(2:1)
+        MOVE conn-status(conn-idx) TO CONN-REC-FILE(3:1)
+        WRITE CONN-REC-FILE
+    END-PERFORM
+    CLOSE CONNECTION-FILE
+    OPEN INPUT CONNECTION-FILE.
 
 SETUP-SKILLS.
     MOVE "Skill1" TO skillName(1)
@@ -204,8 +266,13 @@ MAIN-MENU.
             PERFORM LOGIN
         WHEN 2
             PERFORM CREATE-ACCOUNT
+        WHEN OTHER
+            MOVE "Y" TO doneFlag
     END-EVALUATE
-    PERFORM WELCOME-SCREEN.
+    
+    IF doneFlag NOT = "Y"
+        PERFORM WELCOME-SCREEN
+    END-IF.
 
 CREATE-ACCOUNT.
     IF accountCount >= 5
@@ -264,7 +331,7 @@ CREATE-ACCOUNT.
     MOVE userName TO account-user(accountCount)
     MOVE userPass TO account-pass(accountCount)
     MOVE "Account successfully created!" TO msgBuffer
-    PERFORM DISPLAY-MSG.
+    PERFORM DISPLAY-MSG
     PERFORM SAVE-ACCOUNTS.
 
 LOGIN.
@@ -500,7 +567,7 @@ CREATE-EDIT-PROFILE.
     END-PERFORM
 
     MOVE "Profile saved successfully!" TO msgBuffer
-    PERFORM DISPLAY-MSG.
+    PERFORM DISPLAY-MSG
     PERFORM SAVE-PROFILES.
 
 VIEW-PROFILE.
@@ -510,11 +577,9 @@ VIEW-PROFILE.
     PERFORM DISPLAY-GENERIC-PROFILE.
 
 SEARCH-USER.
-    MOVE "--- Find Someone You Know ---" 
-        TO msgBuffer
+    MOVE "--- Find Someone You Know ---" TO msgBuffer
     PERFORM DISPLAY-MSG
-
-    MOVE "Enter the full name of the person you are looking for:" 
+    MOVE "Enter the full name of the person you are looking for:"
         TO msgBuffer
     PERFORM DISPLAY-MSG
 
@@ -523,33 +588,89 @@ SEARCH-USER.
 
     MOVE "N" TO search-found-flag
     MOVE 0 TO ws-display-idx
-
     PERFORM VARYING search-idx FROM 1 BY 1
-        UNTIL search-idx > accountCount 
-           OR search-found-flag = "Y"
+        UNTIL search-idx > accountCount OR search-found-flag = "Y"
 
-    
         MOVE SPACES TO ws-full-name
         STRING FUNCTION TRIM(first-name(search-idx)) DELIMITED BY SIZE
-               " "                              DELIMITED BY SIZE
+               " " DELIMITED BY SIZE
                FUNCTION TRIM(last-name(search-idx)) DELIMITED BY SIZE
                INTO ws-full-name
         END-STRING
-        
+
         IF FUNCTION TRIM(ws-search-name) = FUNCTION TRIM(ws-full-name)
             MOVE "Y" TO search-found-flag
             MOVE search-idx TO ws-display-idx
         END-IF
-    END-PERFORM.
+    END-PERFORM
 
-    EVALUATE TRUE
-        WHEN search-found-flag = "Y"
-            PERFORM DISPLAY-GENERIC-PROFILE
-        WHEN OTHER
-            MOVE "No one by that name could be found." TO msgBuffer
+    IF search-found-flag = "Y"
+        PERFORM DISPLAY-GENERIC-PROFILE
+        
+        IF ws-display-idx NOT = loggedInUser
+            PERFORM OFFER-CONNECTION-REQUEST
+        END-IF
+    ELSE
+        MOVE "No one by that name could be found." TO msgBuffer
+        PERFORM DISPLAY-MSG
+    END-IF.
+
+OFFER-CONNECTION-REQUEST.
+    MOVE "Would you like to send a connection request? (Y/N):" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    
+    PERFORM READ-INPUT-SAFELY
+    IF FUNCTION UPPER-CASE(FUNCTION TRIM(IN-REC)) = "Y"
+        PERFORM SEND-CONNECTION-REQUEST
+    END-IF.
+
+SEND-CONNECTION-REQUEST.
+    MOVE "Y" TO can-send-request
+    
+    PERFORM VARYING conn-check-idx FROM 1 BY 1 
+        UNTIL conn-check-idx > connection-count
+        
+        IF (conn-user1(conn-check-idx) = loggedInUser AND 
+            conn-user2(conn-check-idx) = ws-display-idx) OR
+           (conn-user1(conn-check-idx) = ws-display-idx AND 
+            conn-user2(conn-check-idx) = loggedInUser)
+            
+            IF conn-status(conn-check-idx) = "A"
+                MOVE "You are already connected with this user." TO msgBuffer
+                PERFORM DISPLAY-MSG
+                MOVE "N" TO can-send-request
+                EXIT PERFORM
+            ELSE IF conn-status(conn-check-idx) = "P"
+                IF conn-user1(conn-check-idx) = ws-display-idx
+                    MOVE "This user has already sent you a connection request." TO msgBuffer
+                    PERFORM DISPLAY-MSG
+                    MOVE "N" TO can-send-request
+                    EXIT PERFORM
+                ELSE
+                    MOVE "You have already sent a connection request to this user." TO msgBuffer
+                    PERFORM DISPLAY-MSG
+                    MOVE "N" TO can-send-request
+                    EXIT PERFORM
+                END-IF
+            END-IF
+        END-IF
+    END-PERFORM
+    
+    IF can-send-request = "Y"
+        IF connection-count < 25
+            ADD 1 TO connection-count
+            MOVE loggedInUser TO conn-user1(connection-count)
+            MOVE ws-display-idx TO conn-user2(connection-count)
+            MOVE "P" TO conn-status(connection-count)
+            
+            MOVE "Connection request sent successfully!" TO msgBuffer
             PERFORM DISPLAY-MSG
-    END-EVALUATE.
-
+            PERFORM SAVE-CONNECTIONS
+        ELSE
+            MOVE "Connection limit reached. Cannot send more requests." TO msgBuffer
+            PERFORM DISPLAY-MSG
+        END-IF
+    END-IF.
 
 DISPLAY-GENERIC-PROFILE.
     IF FUNCTION TRIM(first-name(ws-display-idx)) NOT = SPACES
@@ -680,3 +801,4 @@ DISPLAY-GENERIC-PROFILE.
 
     MOVE "------------------" TO msgBuffer
     PERFORM DISPLAY-MSG.
+    
