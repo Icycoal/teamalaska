@@ -1,2 +1,3 @@
-johndoe             P@ssw0rd1!
-janesmith           P@ssw0rd2!
+alice               Pass123!
+bob                 Secure1@
+charlie             Test456#
