@@ -47,6 +47,8 @@ FD REQUEST-FILE.
     05 REQ-RECEIVER-FILE PIC X(20).
 
 WORKING-STORAGE SECTION.
+01 TARGET-USER   PIC X(20).
+01 USER-FULLNAME PIC X(20).      
 01 mainChoice PIC 9.
 01 subChoice PIC 9.
 01 loginOk PIC X VALUE "N".
@@ -459,8 +461,10 @@ POST-LOGIN-MENU.
             WHEN 4
                 PERFORM VIEW-PENDING-REQUESTS
             WHEN 5
-                PERFORM SKILL-MENU
+                PERFORM VIEW-MY-NETWORK
             WHEN 6
+                MOVE "Y" TO SKILL-MENU
+            WHEN 7
                 MOVE "Y" TO postLoginDoneFlag
         END-EVALUATE
     END-PERFORM.
@@ -509,6 +513,7 @@ VIEW-PENDING-REQUESTS.
         MOVE "You have no pending connection requests." TO msgBuffer
         PERFORM DISPLAY-MSG
     END-IF
+    PERFORM PROCESS-PENDING-REQUESTS
     MOVE "--------------------------------------" TO msgBuffer
     PERFORM DISPLAY-MSG.
 
@@ -920,3 +925,136 @@ DISPLAY-GENERIC-PROFILE.
 
     MOVE "------------------" TO msgBuffer
     PERFORM DISPLAY-MSG.
+
+VIEW-MY-NETWORK.
+      MOVE"--- Your Network ---" TO msgBuffer
+      PERFORM DISPAY-MSG
+
+      MOVE 0 TO ws-display-idx
+      MOVE 0 TO pending-count 
+
+      PERFORM VARYING conn-idx FROM 1 BY 1 UNTIL conn-idx> connection-count
+          IF conn-status(conn-idx) = "A"
+              MOVE SPACES TO TARGET-USER
+              IF FUNCTION TRIM(conn-user1(conn-idx)) = FUNCTION TRIM(account-user(loggedInUser))
+                MOVE conn-user2(conn-idx) TO TARGET-USER
+            ELSE
+                IF FUNCTION TRIM(conn-user2(conn-idx)) = FUNCTION TRIM(account-user(loggedInUser))
+                    MOVE conn-user1(conn-idx) TO TARGET-USER
+                END-IF
+            END-IF
+
+            IF TARGET-USER NOT = SPACES
+                PERFORM FETCH-USER-NAME
+                ADD 1 TO pending-count
+                MOVE SPACES TO msgBuffer
+                STRING "Connected with: " DELIMITED BY SIZE
+                       FUNCTION TRIM(USER-FULLNAME) DELIMITED BY SIZE
+                       INTO msgBuffer
+                END-STRING
+                PERFORM DISPLAY-MSG
+            END-IF
+        END-IF
+    END-PERFORM
+    
+    IF pending-count = 0
+        MOVE "You currently have no established connections." TO msgBuffer
+        PERFORM DISPLAY-MSG
+    END-IF
+
+    MOVE "--------------------------------------" TO msgBuffer
+    PERFORM DISPLAY-MSG.
+
+FETCH-USER-NAME.
+    MOVE SPACES TO USER-FULLNAME
+    PERFORM VARYING ws-display-idx FROM 1 BY 1 UNTIL ws-display-idx > accountCount
+        IF FUNCTION TRIM(account-user(ws-display-idx)) = FUNCTION TRIM(TARGET-USER)
+            MOVE SPACES TO msgBuffer
+            STRING FUNCTION TRIM(first-name(ws-display-idx)) DELIMITED BY SIZE
+                   " " DELIMITED BY SIZE
+                   FUNCTION TRIM(last-name(ws-display-idx)) DELIMITED BY SIZE
+                   INTO USER-FULLNAME
+            END-STRING
+            EXIT PERFORM
+        END-IF
+    END-PERFORM.
+
+PROCESS-PENDING-REQUESTS.
+    PERFORM VARYING conn-idx FROM 1 BY 1 UNTIL conn-idx > request-count
+        IF FUNCTION TRIM(req-receiver(conn-idx)) = FUNCTION TRIM(account-user(loggedInUser))
+            MOVE SPACES TO msgBuffer
+            STRING "Request from: " DELIMITED BY SIZE
+                   FUNCTION TRIM(req-sender(conn-idx)) DELIMITED BY SIZE
+                   " | 1=Accept  2=Reject  3=Skip" DELIMITED BY SIZE
+                   INTO msgBuffer
+            END-STRING
+            PERFORM DISPLAY-MSG
+
+            PERFORM READ-INPUT-SAFELY
+            MOVE FUNCTION TRIM(IN-REC) TO trimmed-input
+            EVALUATE trimmed-input
+                WHEN "1"
+                    PERFORM ACCEPT-THIS-REQUEST
+                WHEN "2"
+                    PERFORM REJECT-THIS-REQUEST
+                WHEN OTHER
+                    CONTINUE
+            END-EVALUATE
+        END-IF
+    END-PERFORM
+
+    *> Persist updates
+    PERFORM SAVE-REQUESTS
+    PERFORM SAVE-CONNECTIONS.
+
+ACCEPT-THIS-REQUEST.
+    *> Avoid duplicate connection
+    MOVE "N" TO foundFlag
+    PERFORM VARYING conn-check-idx FROM 1 BY 1 UNTIL conn-check-idx > connection-count OR foundFlag = "Y"
+        IF (FUNCTION TRIM(conn-user1(conn-check-idx)) = FUNCTION TRIM(account-user(loggedInUser)) AND
+            FUNCTION TRIM(conn-user2(conn-check-idx)) = FUNCTION TRIM(req-sender(conn-idx))) OR
+           (FUNCTION TRIM(conn-user2(conn-check-idx)) = FUNCTION TRIM(account-user(loggedInUser)) AND
+            FUNCTION TRIM(conn-user1(conn-check-idx)) = FUNCTION TRIM(req-sender(conn-idx)))
+            MOVE "Y" TO foundFlag
+        END-IF
+    END-PERFORM
+
+    IF foundFlag = "N"
+        IF connection-count < 25
+            ADD 1 TO connection-count
+            MOVE account-user(loggedInUser) TO conn-user1(connection-count)
+            MOVE req-sender(conn-idx)       TO conn-user2(connection-count)
+            MOVE "A"                        TO conn-status(connection-count)
+        END-IF
+    END-IF
+
+    MOVE SPACES TO msgBuffer
+    STRING "Connection request from " DELIMITED BY SIZE
+           FUNCTION TRIM(req-sender(conn-idx)) DELIMITED BY SIZE
+           " accepted!" DELIMITED BY SIZE
+           INTO msgBuffer
+    END-STRING
+    PERFORM DISPLAY-MSG
+
+    PERFORM DELETE-REQUEST-AT-IDX.
+
+REJECT-THIS-REQUEST.
+    MOVE SPACES TO msgBuffer
+    STRING "Connection request from " DELIMITED BY SIZE
+           FUNCTION TRIM(req-sender(conn-idx)) DELIMITED BY SIZE
+           " rejected." DELIMITED BY SIZE
+           INTO msgBuffer
+    END-STRING
+    PERFORM DISPLAY-MSG
+    PERFORM DELETE-REQUEST-AT-IDX.
+
+DELETE-REQUEST-AT-IDX.
+    *> Shift subsequent requests left to delete current index
+    PERFORM VARYING ws-display-idx FROM conn-idx BY 1 UNTIL ws-display-idx >= request-count
+        ADD 1 TO temp-year  *> reuse as temp integer counter
+        MOVE req-sender(ws-display-idx + 1)   TO req-sender(ws-display-idx)
+        MOVE req-receiver(ws-display-idx + 1) TO req-receiver(ws-display-idx)
+    END-PERFORM
+    SUBTRACT 1 FROM request-count
+    SUBTRACT 1 FROM conn-idx  *> so the next PERFORM iteration stays aligned.
+      
