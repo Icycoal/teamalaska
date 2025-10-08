@@ -182,46 +182,6 @@ Connection request sent successfully!
 5. Learn a New Skill
 6. View My Network
 7. Go Back
---- Find Someone You Know ---
-Enter the full name of the person you are looking for:
-Name: Bob Builder
-University: Stanford
-Major: Engineering
-Graduation Year: 2026
-About Me:
-Robotics enthusiast
-Experience:
-Education:
-------------------
-Would you like to send a connection request? (Y/N):
-Connection request sent successfully!
-1. Create/Edit My Profile
-2. View My Profile
-3. Search for User
-4. View My Pending Connection Requests
-5. Learn a New Skill
-6. View My Network
-7. Go Back
---- Find Someone You Know ---
-Enter the full name of the person you are looking for:
-Name: Charlie Brown
-University: Harvard
-Major: Business
-Graduation Year: 2024
-About Me:
-Entrepreneur and innovator
-Experience:
-Education:
-------------------
-Would you like to send a connection request? (Y/N):
-Connection request sent successfully!
-1. Create/Edit My Profile
-2. View My Profile
-3. Search for User
-4. View My Pending Connection Requests
-5. Learn a New Skill
-6. View My Network
-7. Go Back
 Welcome to InCollege!
 1. Log In
 2. Create New Account
@@ -230,9 +190,6 @@ Please enter your username:
 Please enter your password:
 You have successfully logged in.
 Welcome, bob!
-========================================
-You have 01 pending connection request(s)
-========================================
 1. Create/Edit My Profile
 2. View My Profile
 3. Search for User
@@ -253,9 +210,6 @@ Education:
 ------------------
 Would you like to send a connection request? (Y/N):
 Connection request sent successfully!
-========================================
-You have 01 pending connection request(s)
-========================================
 1. Create/Edit My Profile
 2. View My Profile
 3. Search for User
@@ -271,9 +225,6 @@ Please enter your username:
 Please enter your password:
 You have successfully logged in.
 Welcome, charlie!
-========================================
-You have 01 pending connection request(s)
-========================================
 1. Create/Edit My Profile
 2. View My Profile
 3. Search for User
@@ -294,9 +245,6 @@ Education:
 ------------------
 Would you like to send a connection request? (Y/N):
 Connection request sent successfully!
-========================================
-You have 01 pending connection request(s)
-========================================
 1. Create/Edit My Profile
 2. View My Profile
 3. Search for User
@@ -331,7 +279,7 @@ Connection request from diana accepted!
 Request from: bob | 1=Accept  2=Reject  3=Skip
 Connection request from bob accepted!
 Request from: charlie | 1=Accept  2=Reject  3=Skip
-Connection request from charlie accepted!
+Connection request from charlie rejected.
 --------------------------------------
 1. Create/Edit My Profile
 2. View My Profile
@@ -343,150 +291,7 @@ Connection request from charlie accepted!
 --- Your Network ---
 Connected with: Diana Prince (University: Yale, Major: Psychology)
 Connected with: Bob Builder (University: Stanford, Major: Engineering)
-Connected with: Charlie Brown (University: Harvard, Major: Business)
 --------------------------------------
-1. Create/Edit My Profile
-2. View My Profile
-3. Search for User
-4. View My Pending Connection Requests
-5. Learn a New Skill
-6. View My Network
-7. Go Back
-Welcome to InCollege!
-1. Log In
-2. Create New Account
-Enter your choice:
-Please enter your username:
-Please enter your password:
-You have successfully logged in.
-Welcome, alice!
-1. Create/Edit My Profile
-2. View My Profile
-3. Search for User
-4. View My Pending Connection Requests
-5. Learn a New Skill
-6. View My Network
-7. Go Back
---- Your Network ---
-Connected with: Diana Prince (University: Yale, Major: Psychology)
-Connected with: Bob Builder (University: Stanford, Major: Engineering)
-Connected with: Charlie Brown (University: Harvard, Major: Business)
---------------------------------------
-1. Create/Edit My Profile
-2. View My Profile
-3. Search for User
-4. View My Pending Connection Requests
-5. Learn a New Skill
-6. View My Network
-7. Go Back
-Welcome to InCollege!
-1. Log In
-2. Create New Account
-Enter your choice:
-Please enter your username:
-Please enter your password:
-You have successfully logged in.
-Welcome, bob!
-========================================
-You have 01 pending connection request(s)
-========================================
-1. Create/Edit My Profile
-2. View My Profile
-3. Search for User
-4. View My Pending Connection Requests
-5. Learn a New Skill
-6. View My Network
-7. Go Back
---- My Pending Connection Requests ---
-01. From: diana
-Request from: diana | 1=Accept  2=Reject  3=Skip
-Connection request from diana accepted!
---------------------------------------
-1. Create/Edit My Profile
-2. View My Profile
-3. Search for User
-4. View My Pending Connection Requests
-5. Learn a New Skill
-6. View My Network
-7. Go Back
---- Your Network ---
-Connected with: Alice Wonder (University: MIT, Major: Computer Science)
-Connected with: Diana Prince (University: Yale, Major: Psychology)
---------------------------------------
-1. Create/Edit My Profile
-2. View My Profile
-3. Search for User
-4. View My Pending Connection Requests
-5. Learn a New Skill
-6. View My Network
-7. Go Back
-Welcome to InCollege!
-1. Log In
-2. Create New Account
-Enter your choice:
-Please enter your username:
-Please enter your password:
-You have successfully logged in.
-Welcome, charlie!
-========================================
-You have 01 pending connection request(s)
-========================================
-1. Create/Edit My Profile
-2. View My Profile
-3. Search for User
-4. View My Pending Connection Requests
-5. Learn a New Skill
-6. View My Network
-7. Go Back
---- My Pending Connection Requests ---
-01. From: diana
-Request from: diana | 1=Accept  2=Reject  3=Skip
-Connection request from diana rejected.
---------------------------------------
-1. Create/Edit My Profile
-2. View My Profile
-3. Search for User
-4. View My Pending Connection Requests
-5. Learn a New Skill
-6. View My Network
-7. Go Back
---- Your Network ---
-Connected with: Alice Wonder (University: MIT, Major: Computer Science)
---------------------------------------
-1. Create/Edit My Profile
-2. View My Profile
-3. Search for User
-4. View My Pending Connection Requests
-5. Learn a New Skill
-6. View My Network
-7. Go Back
-Welcome to InCollege!
-1. Log In
-2. Create New Account
-Enter your choice:
-Please enter your username:
-Please enter your password:
-You have successfully logged in.
-Welcome, diana!
-1. Create/Edit My Profile
-2. View My Profile
-3. Search for User
-4. View My Pending Connection Requests
-5. Learn a New Skill
-6. View My Network
-7. Go Back
---- My Pending Connection Requests ---
---------------------------------------
-1. Create/Edit My Profile
-2. View My Profile
-3. Search for User
-4. View My Pending Connection Requests
-5. Learn a New Skill
-6. View My Network
-7. Go Back
---- Find Someone You Know ---
-Enter the full name of the person you are looking for:
-No one by that name could be found.
 1. Create/Edit My Profile
 2. View My Profile
 3. Search for User

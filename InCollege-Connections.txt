@@ -1,0 +1,4 @@
+alice               diana               A
+alice               bob                 A
+alice               charlie             A
+bob                 diana               A

@@ -1,3 +1,0 @@
-charlie             alice
-bob                 alice
-bob                 charlie

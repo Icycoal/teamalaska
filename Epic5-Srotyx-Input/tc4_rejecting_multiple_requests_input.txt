@@ -64,12 +64,6 @@ DONE
 3
 Alice Wonder
 Y
-3
-Bob Builder
-Y
-3
-Charlie Brown
-Y
 7
 1
 bob
@@ -89,35 +83,8 @@ Y
 alice
 Pass123!
 4
-1
-1
-1
-6
-7
-1
-alice
-Pass123!
-6
-7
-1
-bob
-Secure1@
-4
-1
-6
-7
-1
-charlie
-Test456#
-4
+2
+2
 2
 6
 7
-1
-diana
-Secure99@
-4
-3
-6
-7
-0
