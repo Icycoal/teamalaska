@@ -7,6 +7,9 @@ Secure1@
 2
 charlie
 Test456#
+2
+diana
+Secure99@
 1
 alice
 Pass123!
@@ -16,10 +19,10 @@ Wonder
 MIT
 Computer Science
 2025
-AI researcher
+AI researcher and developer
 DONE
 DONE
-6
+7
 1
 bob
 Secure1@
@@ -32,7 +35,7 @@ Engineering
 Robotics enthusiast
 DONE
 DONE
-6
+7
 1
 charlie
 Test456#
@@ -42,37 +45,79 @@ Brown
 Harvard
 Business
 2024
-Entrepreneur
+Entrepreneur and innovator
 DONE
 DONE
-3
-Alice Wonder
-Y
-3
-Alice Wonder
-Y
-3
-NonExistent User
-4
-6
+7
 1
-alice
-Pass123!
-4
-6
+diana
+Secure99@
+1
+Diana
+Prince
+Yale
+Psychology
+2025
+Mental health advocate
+DONE
+DONE
+3
+Alice Wonder
+Y
+3
+Bob Builder
+Y
+3
+Charlie Brown
+Y
+7
 1
 bob
 Secure1@
 3
 Alice Wonder
 Y
+7
+1
+charlie
+Test456#
 3
-Charlie Brown
+Alice Wonder
 Y
+7
+1
+alice
+Pass123!
 4
+1
+1
+1
 6
+7
+1
+alice
+Pass123!
+6
+7
+1
+bob
+Secure1@
+4
+1
+6
+7
 1
 charlie
 Test456#
 4
+2
 6
+7
+1
+diana
+Secure99@
+4
+3
+6
+7
+0
