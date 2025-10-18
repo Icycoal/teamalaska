@@ -20,6 +20,9 @@ FILE-CONTROL.
     SELECT REQUEST-FILE ASSIGN TO "InCollege-Requests.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         FILE STATUS IS request-file-status.
+    SELECT JOBS-FILE ASSIGN TO "InCollege-Jobs.txt"
+        ORGANIZATION IS LINE SEQUENTIAL
+        FILE STATUS IS jobs-file-status.
 
 DATA DIVISION.
 FILE SECTION.
@@ -46,9 +49,12 @@ FD REQUEST-FILE.
     05 REQ-SENDER-FILE   PIC X(20).
     05 REQ-RECEIVER-FILE PIC X(20).
 
+FD JOBS-FILE.
+01 JOB-REC-FILE PIC X(400).
+
 WORKING-STORAGE SECTION.
 01 TARGET-USER   PIC X(20).
-01 USER-FULLNAME PIC X(250).      
+01 USER-FULLNAME PIC X(250).
 01 mainChoice PIC 9.
 01 subChoice PIC 9.
 01 loginOk PIC X VALUE "N".
@@ -93,6 +99,14 @@ WORKING-STORAGE SECTION.
 01 conn-status-check PIC X.
 01 can-send-request PIC X.
 01 pending-count PIC 99.
+
+01 jobs-file-status PIC XX.
+01 jobMenuDoneFlag PIC X.
+01 job-title     PIC X(50).
+01 job-desc      PIC X(200).
+01 job-employer  PIC X(50).
+01 job-location  PIC X(50).
+01 job-salary    PIC X(30).
 
 01 accounts.
     05 account-user OCCURS 5 TIMES PIC X(20) VALUE SPACES.
@@ -164,6 +178,7 @@ START-PROGRAM.
     ELSE
         PERFORM LOAD-REQUESTS
     END-IF
+
     PERFORM SETUP-SKILLS
     PERFORM WELCOME-SCREEN
     MOVE "N" TO programDoneFlag
@@ -297,8 +312,6 @@ READ-INPUT-SAFELY.
             MOVE "0" TO IN-REC
         NOT AT END
             MOVE IN-REC TO debug-input
-            *> Uncomment next line for debugging
-            *> DISPLAY "DEBUG: Read input: [" debug-input "]"
     END-READ.
 
 MAIN-MENU.
@@ -312,7 +325,7 @@ MAIN-MENU.
         WHEN OTHER
             MOVE "Y" TO programDoneFlag
     END-EVALUATE
-    
+
     IF programDoneFlag NOT = "Y"
         PERFORM WELCOME-SCREEN
     END-IF.
@@ -365,8 +378,6 @@ CREATE-ACCOUNT.
     ADD 1 TO accountCount
     MOVE userName TO account-user(accountCount)
     MOVE userPass TO account-pass(accountCount)
-    
-    
     MOVE "Account successfully created!" TO msgBuffer
     PERFORM DISPLAY-MSG
     PERFORM SAVE-ACCOUNTS.
@@ -414,7 +425,7 @@ POST-LOGIN-MENU.
     MOVE "N" TO postLoginDoneFlag
     PERFORM UNTIL postLoginDoneFlag = "Y"
         PERFORM CHECK-PENDING-REQUESTS
-        
+
         MOVE "1. Create/Edit My Profile" TO msgBuffer
         PERFORM DISPLAY-MSG
         MOVE "2. View My Profile" TO msgBuffer
@@ -428,6 +439,8 @@ POST-LOGIN-MENU.
         MOVE "6. View My Network" TO msgBuffer
         PERFORM DISPLAY-MSG
         MOVE "7. Go Back" TO msgBuffer
+        PERFORM DISPLAY-MSG
+        MOVE "8. Job Search/Internship" TO msgBuffer
         PERFORM DISPLAY-MSG
 
         PERFORM READ-INPUT-SAFELY
@@ -448,6 +461,8 @@ POST-LOGIN-MENU.
                 PERFORM VIEW-MY-NETWORK
             WHEN 7
                 MOVE "Y" TO postLoginDoneFlag
+            WHEN 8
+                PERFORM JOB-MENU
         END-EVALUATE
     END-PERFORM.
 
@@ -458,7 +473,7 @@ CHECK-PENDING-REQUESTS.
             ADD 1 TO pending-count
         END-IF
     END-PERFORM
-    
+
     IF pending-count > 0
         MOVE "========================================" TO msgBuffer
         PERFORM DISPLAY-MSG
@@ -476,7 +491,7 @@ CHECK-PENDING-REQUESTS.
 VIEW-PENDING-REQUESTS.
     MOVE "--- My Pending Connection Requests ---" TO msgBuffer
     PERFORM DISPLAY-MSG
-    
+
     MOVE 0 TO pending-count
     PERFORM VARYING conn-idx FROM 1 BY 1 UNTIL conn-idx > request-count
         IF req-receiver(conn-idx) = account-user(loggedInUser)
@@ -490,11 +505,7 @@ VIEW-PENDING-REQUESTS.
             PERFORM DISPLAY-MSG
         END-IF
     END-PERFORM
-    
-*>    IF pending-count = 0
-*>        MOVE "You have no pending connection requests." TO msgBuffer
-*>        PERFORM DISPLAY-MSG
-*>    END-IF
+
     PERFORM PROCESS-PENDING-REQUESTS
     MOVE "--------------------------------------" TO msgBuffer
     PERFORM DISPLAY-MSG.
@@ -521,6 +532,126 @@ SKILL-MENU.
             MOVE "Y" TO postLoginDoneFlag
         END-IF
     END-PERFORM.
+
+JOB-MENU.
+    MOVE "N" TO jobMenuDoneFlag
+    PERFORM UNTIL jobMenuDoneFlag = "Y"
+        MOVE "--- Job Search/Internship Menu ---" TO msgBuffer
+        PERFORM DISPLAY-MSG
+        MOVE "1. Post a Job/Internship" TO msgBuffer
+        PERFORM DISPLAY-MSG
+        MOVE "2. Browse Jobs/Internships" TO msgBuffer
+        PERFORM DISPLAY-MSG
+        MOVE "3. Back to Main Menu" TO msgBuffer
+        PERFORM DISPLAY-MSG
+        MOVE "Enter your choice:" TO msgBuffer
+        PERFORM DISPLAY-MSG
+
+        PERFORM READ-INPUT-SAFELY
+        MOVE FUNCTION NUMVAL(IN-REC) TO ws-display-idx
+
+        EVALUATE ws-display-idx
+            WHEN 1
+                PERFORM POST-JOB
+            WHEN 2
+                MOVE "This feature is under construction." TO msgBuffer
+                PERFORM DISPLAY-MSG
+            WHEN 3
+                MOVE "Y" TO jobMenuDoneFlag
+            WHEN OTHER
+                MOVE "Invalid choice." TO msgBuffer
+                PERFORM DISPLAY-MSG
+        END-EVALUATE
+    END-PERFORM.
+
+
+POST-JOB.
+    MOVE "--- Post a New Job/Internship ---" TO msgBuffer
+    PERFORM DISPLAY-MSG
+
+    *> Title (required)
+    PERFORM UNTIL FUNCTION TRIM(job-title) NOT = SPACES
+        MOVE "Enter Job Title:" TO msgBuffer
+        PERFORM DISPLAY-MSG
+        PERFORM READ-INPUT-SAFELY
+        MOVE FUNCTION TRIM(IN-REC) TO job-title
+        IF FUNCTION TRIM(job-title) = SPACES
+            MOVE "This field is required. Please try again." TO msgBuffer
+            PERFORM DISPLAY-MSG
+        END-IF
+    END-PERFORM
+
+    *> Description (required, max 200 per PIC)
+    PERFORM UNTIL FUNCTION TRIM(job-desc) NOT = SPACES
+        MOVE "Enter Description (max 200 chars):" TO msgBuffer
+        PERFORM DISPLAY-MSG
+        PERFORM READ-INPUT-SAFELY
+        MOVE FUNCTION TRIM(IN-REC) TO job-desc
+        IF FUNCTION TRIM(job-desc) = SPACES
+            MOVE "This field is required. Please try again." TO msgBuffer
+            PERFORM DISPLAY-MSG
+        END-IF
+    END-PERFORM
+
+    *> Employer (required)
+    PERFORM UNTIL FUNCTION TRIM(job-employer) NOT = SPACES
+        MOVE "Enter Employer Name:" TO msgBuffer
+        PERFORM DISPLAY-MSG
+        PERFORM READ-INPUT-SAFELY
+        MOVE FUNCTION TRIM(IN-REC) TO job-employer
+        IF FUNCTION TRIM(job-employer) = SPACES
+            MOVE "This field is required. Please try again." TO msgBuffer
+            PERFORM DISPLAY-MSG
+        END-IF
+    END-PERFORM
+
+    *> Location (required)
+    PERFORM UNTIL FUNCTION TRIM(job-location) NOT = SPACES
+        MOVE "Enter Location:" TO msgBuffer
+        PERFORM DISPLAY-MSG
+        PERFORM READ-INPUT-SAFELY
+        MOVE FUNCTION TRIM(IN-REC) TO job-location
+        IF FUNCTION TRIM(job-location) = SPACES
+            MOVE "This field is required. Please try again." TO msgBuffer
+            PERFORM DISPLAY-MSG
+        END-IF
+    END-PERFORM
+
+    *> Salary optional
+    MOVE "Enter Salary (optional, enter 'NONE' to skip):" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    PERFORM READ-INPUT-SAFELY
+    MOVE FUNCTION TRIM(IN-REC) TO job-salary
+    IF FUNCTION TRIM(job-salary) = "NONE"
+        MOVE SPACES TO job-salary
+    END-IF
+
+    OPEN EXTEND JOBS-FILE
+    IF jobs-file-status = "35"
+        OPEN OUTPUT JOBS-FILE
+        CLOSE JOBS-FILE
+        OPEN EXTEND JOBS-FILE
+    END-IF
+    MOVE SPACES TO JOB-REC-FILE
+    STRING
+        FUNCTION TRIM(job-title)    DELIMITED BY SIZE
+        "|"                          DELIMITED BY SIZE
+        FUNCTION TRIM(job-desc)     DELIMITED BY SIZE
+        "|"                          DELIMITED BY SIZE
+        FUNCTION TRIM(job-employer) DELIMITED BY SIZE
+        "|"                          DELIMITED BY SIZE
+        FUNCTION TRIM(job-location) DELIMITED BY SIZE
+        "|"                          DELIMITED BY SIZE
+        FUNCTION TRIM(job-salary)   DELIMITED BY SIZE
+        INTO JOB-REC-FILE
+    END-STRING
+    WRITE JOB-REC-FILE
+    CLOSE JOBS-FILE
+
+    MOVE "Job posted successfully!" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    MOVE "----------------------------------" TO msgBuffer
+    PERFORM DISPLAY-MSG.
 
 DISPLAY-MSG.
     DISPLAY msgBuffer
@@ -676,7 +807,7 @@ SEARCH-USER.
     END-PERFORM
     IF search-found-flag = "Y"
         PERFORM DISPLAY-GENERIC-PROFILE
-        
+
         IF ws-display-idx NOT = loggedInUser
             PERFORM OFFER-CONNECTION-REQUEST
         END-IF
@@ -688,7 +819,7 @@ SEARCH-USER.
 OFFER-CONNECTION-REQUEST.
     MOVE "Would you like to send a connection request? (Y/N):" TO msgBuffer
     PERFORM DISPLAY-MSG
-    
+
     PERFORM READ-INPUT-SAFELY
     IF FUNCTION UPPER-CASE(FUNCTION TRIM(IN-REC)) = "Y"
         PERFORM SEND-CONNECTION-REQUEST
@@ -696,22 +827,22 @@ OFFER-CONNECTION-REQUEST.
 
 SEND-CONNECTION-REQUEST.
     MOVE "Y" TO can-send-request
-    
+
     *> Check in requests file for pending requests
-    PERFORM VARYING conn-check-idx FROM 1 BY 1 
+    PERFORM VARYING conn-check-idx FROM 1 BY 1
         UNTIL conn-check-idx > request-count
-        
+
         *> Check if already sent request
-        IF req-sender(conn-check-idx) = account-user(loggedInUser) AND 
+        IF req-sender(conn-check-idx) = account-user(loggedInUser) AND
            req-receiver(conn-check-idx) = account-user(ws-display-idx)
             MOVE "You have already sent a connection request to this user." TO msgBuffer
             PERFORM DISPLAY-MSG
             MOVE "N" TO can-send-request
             EXIT PERFORM
         END-IF
-        
+
         *> Check if other user already sent request
-        IF req-sender(conn-check-idx) = account-user(ws-display-idx) AND 
+        IF req-sender(conn-check-idx) = account-user(ws-display-idx) AND
            req-receiver(conn-check-idx) = account-user(loggedInUser)
             MOVE "This user has already sent you a connection request." TO msgBuffer
             PERFORM DISPLAY-MSG
@@ -719,16 +850,16 @@ SEND-CONNECTION-REQUEST.
             EXIT PERFORM
         END-IF
     END-PERFORM
-    
+
     *> Check in connections file for accepted connections
     IF can-send-request = "Y"
-        PERFORM VARYING conn-check-idx FROM 1 BY 1 
+        PERFORM VARYING conn-check-idx FROM 1 BY 1
             UNTIL conn-check-idx > connection-count
-            
-            IF (conn-user1(conn-check-idx) = account-user(loggedInUser) AND 
+
+            IF (conn-user1(conn-check-idx) = account-user(loggedInUser) AND
                 conn-user2(conn-check-idx) = account-user(ws-display-idx) AND
                 conn-status(conn-check-idx) = "A") OR
-               (conn-user1(conn-check-idx) = account-user(ws-display-idx) AND 
+               (conn-user1(conn-check-idx) = account-user(ws-display-idx) AND
                 conn-user2(conn-check-idx) = account-user(loggedInUser) AND
                 conn-status(conn-check-idx) = "A")
                 MOVE "You are already connected with this user." TO msgBuffer
@@ -738,13 +869,13 @@ SEND-CONNECTION-REQUEST.
             END-IF
         END-PERFORM
     END-IF
-    
+
     IF can-send-request = "Y"
         IF request-count < 25
             ADD 1 TO request-count
             MOVE account-user(loggedInUser) TO req-sender(request-count)
             MOVE account-user(ws-display-idx) TO req-receiver(request-count)
-            
+
             MOVE "Connection request sent successfully!" TO msgBuffer
             PERFORM DISPLAY-MSG
             PERFORM SAVE-REQUESTS
@@ -833,7 +964,7 @@ DISPLAY-GENERIC-PROFILE.
                 END-STRING
                 PERFORM DISPLAY-MSG
             END-IF
-            
+
             MOVE " " TO msgBuffer
             PERFORM DISPLAY-MSG
         END-IF
@@ -864,7 +995,7 @@ DISPLAY-GENERIC-PROFILE.
                 END-STRING
                 PERFORM DISPLAY-MSG
             END-IF
-            
+
             MOVE " " TO msgBuffer
             PERFORM DISPLAY-MSG
         END-IF
@@ -878,7 +1009,7 @@ VIEW-MY-NETWORK.
       PERFORM DISPLAY-MSG
 
       MOVE 0 TO ws-display-idx
-      MOVE 0 TO pending-count 
+      MOVE 0 TO pending-count
 
       PERFORM VARYING conn-idx FROM 1 BY 1 UNTIL conn-idx> connection-count
           IF conn-status(conn-idx) = "A"
@@ -961,7 +1092,6 @@ PROCESS-PENDING-REQUESTS.
     PERFORM SAVE-CONNECTIONS.
 
 ACCEPT-THIS-REQUEST.
-    *> Avoid duplicate connection
     MOVE "N" TO foundFlag
     PERFORM VARYING conn-check-idx FROM 1 BY 1 UNTIL conn-check-idx > connection-count OR foundFlag = "Y"
         IF (FUNCTION TRIM(conn-user1(conn-check-idx)) = FUNCTION TRIM(account-user(loggedInUser)) AND
@@ -1002,12 +1132,10 @@ REJECT-THIS-REQUEST.
     PERFORM DELETE-REQUEST-AT-IDX.
 
 DELETE-REQUEST-AT-IDX.
-    *> Shift subsequent requests left to delete current index
     PERFORM VARYING ws-display-idx FROM conn-idx BY 1 UNTIL ws-display-idx >= request-count
-        ADD 1 TO temp-year  *> reuse as temp integer counter
+        ADD 1 TO temp-year
         MOVE req-sender(ws-display-idx + 1)   TO req-sender(ws-display-idx)
         MOVE req-receiver(ws-display-idx + 1) TO req-receiver(ws-display-idx)
     END-PERFORM
     SUBTRACT 1 FROM request-count
-    SUBTRACT 1 FROM conn-idx  *> so the next PERFORM iteration stays aligned
-.
+    SUBTRACT 1 FROM conn-idx.
