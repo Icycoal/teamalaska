@@ -569,53 +569,40 @@ POST-JOB.
     MOVE "--- Post a New Job/Internship ---" TO msgBuffer
     PERFORM DISPLAY-MSG
 
-    *> Title (required)
-    PERFORM UNTIL FUNCTION TRIM(job-title) NOT = SPACES
-        MOVE "Enter Job Title:" TO msgBuffer
-        PERFORM DISPLAY-MSG
-        PERFORM READ-INPUT-SAFELY
-        MOVE FUNCTION TRIM(IN-REC) TO job-title
-        IF FUNCTION TRIM(job-title) = SPACES
-            MOVE "This field is required. Please try again." TO msgBuffer
-            PERFORM DISPLAY-MSG
-        END-IF
-    END-PERFORM
+    *> Collect required fields exactly once
+    MOVE "Enter Job Title:" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    PERFORM READ-INPUT-SAFELY
+    MOVE FUNCTION TRIM(IN-REC) TO job-title
 
-    *> Description (required, max 200 per PIC)
-    PERFORM UNTIL FUNCTION TRIM(job-desc) NOT = SPACES
-        MOVE "Enter Description (max 200 chars):" TO msgBuffer
-        PERFORM DISPLAY-MSG
-        PERFORM READ-INPUT-SAFELY
-        MOVE FUNCTION TRIM(IN-REC) TO job-desc
-        IF FUNCTION TRIM(job-desc) = SPACES
-            MOVE "This field is required. Please try again." TO msgBuffer
-            PERFORM DISPLAY-MSG
-        END-IF
-    END-PERFORM
+    MOVE "Enter Description (max 200 chars):" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    PERFORM READ-INPUT-SAFELY
+    MOVE FUNCTION TRIM(IN-REC) TO job-desc
 
-    *> Employer (required)
-    PERFORM UNTIL FUNCTION TRIM(job-employer) NOT = SPACES
-        MOVE "Enter Employer Name:" TO msgBuffer
-        PERFORM DISPLAY-MSG
-        PERFORM READ-INPUT-SAFELY
-        MOVE FUNCTION TRIM(IN-REC) TO job-employer
-        IF FUNCTION TRIM(job-employer) = SPACES
-            MOVE "This field is required. Please try again." TO msgBuffer
-            PERFORM DISPLAY-MSG
-        END-IF
-    END-PERFORM
+    MOVE "Enter Employer Name:" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    PERFORM READ-INPUT-SAFELY
+    MOVE FUNCTION TRIM(IN-REC) TO job-employer
 
-    *> Location (required)
-    PERFORM UNTIL FUNCTION TRIM(job-location) NOT = SPACES
-        MOVE "Enter Location:" TO msgBuffer
+    MOVE "Enter Location:" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    PERFORM READ-INPUT-SAFELY
+    MOVE FUNCTION TRIM(IN-REC) TO job-location
+
+    *> Validate required fields BEFORE asking for salary
+    IF FUNCTION TRIM(job-title)    = SPACES
+       OR FUNCTION TRIM(job-desc)  = SPACES
+       OR FUNCTION TRIM(job-employer) = SPACES
+       OR FUNCTION TRIM(job-location) = SPACES
+        MOVE "Error: All required fields must be filled in." TO msgBuffer
         PERFORM DISPLAY-MSG
-        PERFORM READ-INPUT-SAFELY
-        MOVE FUNCTION TRIM(IN-REC) TO job-location
-        IF FUNCTION TRIM(job-location) = SPACES
-            MOVE "This field is required. Please try again." TO msgBuffer
-            PERFORM DISPLAY-MSG
-        END-IF
-    END-PERFORM
+        MOVE "Job not posted." TO msgBuffer
+        PERFORM DISPLAY-MSG
+        MOVE "----------------------------------" TO msgBuffer
+        PERFORM DISPLAY-MSG
+        EXIT PARAGRAPH
+    END-IF
 
     *> Salary optional
     MOVE "Enter Salary (optional, enter 'NONE' to skip):" TO msgBuffer
@@ -626,12 +613,14 @@ POST-JOB.
         MOVE SPACES TO job-salary
     END-IF
 
+    *> Persist only when validation passed
     OPEN EXTEND JOBS-FILE
     IF jobs-file-status = "35"
         OPEN OUTPUT JOBS-FILE
         CLOSE JOBS-FILE
         OPEN EXTEND JOBS-FILE
     END-IF
+
     MOVE SPACES TO JOB-REC-FILE
     STRING
         FUNCTION TRIM(job-title)    DELIMITED BY SIZE
@@ -652,6 +641,7 @@ POST-JOB.
     PERFORM DISPLAY-MSG
     MOVE "----------------------------------" TO msgBuffer
     PERFORM DISPLAY-MSG.
+
 
 DISPLAY-MSG.
     DISPLAY msgBuffer
