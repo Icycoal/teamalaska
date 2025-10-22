@@ -1,16 +1,7 @@
-2
-alice
-Pass123!
 1
 alice
 Pass123!
 8
-1
-NONE
-Assist with feature development and testing
-InCollege Corp
-Tampa, FL
-$25/hour
-3
+2
 7
-0
+7
