@@ -6,7 +6,7 @@ alice
 Pass123!
 8
 1
-NONE
+
 Assist with feature development and testing
 InCollege Corp
 Tampa, FL
