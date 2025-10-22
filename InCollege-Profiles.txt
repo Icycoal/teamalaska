@@ -1,4 +1,1 @@
-Alice               Wonder              MIT                                               Computer Science                                  2025AI researcher and developer
-Bob                 Builder             Stanford                                          Engineering                                       2026Robotics enthusiast
-Charlie             Brown               Harvard                                           Business                                          2024Entrepreneur and innovator
-Diana               Prince              Yale                                              Psychology                                        2025Mental health advocate
+

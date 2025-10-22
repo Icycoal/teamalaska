@@ -1129,3 +1129,4 @@ DELETE-REQUEST-AT-IDX.
     END-PERFORM
     SUBTRACT 1 FROM request-count
     SUBTRACT 1 FROM conn-idx.
+    
