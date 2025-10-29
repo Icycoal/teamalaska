@@ -1,16 +1,24 @@
 2
-alice
-Pass123!
+testuser
+Password123!
 1
-alice
-Pass123!
+testuser
+Password123!
 8
 1
-Software Intern
-Assist with feature development and testing
-InCollege Corp
-Tampa, FL
-$25/hour
-3
-7
+Software Engineer
+Develop software applications
+Tech Company
+New York, NY
+75000
+8
+2
+1
+1
+8
+2
 0
+8
+3
+4
+7
