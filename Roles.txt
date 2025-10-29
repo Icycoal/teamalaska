@@ -22,23 +22,23 @@ Epic #4	Scrum Master: Jawad Ahmed
 	Tester #1: Jyothik Addala
 	Tester #2: Awwab Ahmed
 		
-Epic #5	Scrum Master:	
-	Coder #1:	
-	Coder #2:	
-	Tester #1:	
-	Tester #2:	
+Epic #5	Scrum Master: Awwab Ahmed	
+	Coder #1: Jawad Ahmed	
+	Coder #2: Sama Ahmed	
+	Tester #1: Maksud Akramov	
+	Tester #2: Jyothik Addala	
 		
-Epic #6	Scrum Master:	
-	Coder #1:	
-	Coder #2:	
-	Tester #1:	
-	Tester #2:	
+Epic #6	Scrum Master: Jyothik Addala	
+	Coder #1: Awwab Ahmed	
+	Coder #2: Jawad Ahmed	
+	Tester #1: Sama Ahmed	
+	Tester #2: Maksud Akramov	
 		
-Epic #7	Scrum Master:	
-	Coder #1:	
-	Coder #2:	
-	Tester #1:	
-	Tester #2:	
+Epic #7	Scrum Master: Maksud Akramov	
+	Coder #1: Jyothik Addala	
+	Coder #2: Awwab Ahmed	
+	Tester #1: Jawad Ahmed	
+	Tester #2: Sama Ahmed	
 		
 Epic #8	Scrum Master:	
 	Coder #1:	
