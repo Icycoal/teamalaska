@@ -4,26 +4,26 @@ PROGRAM-ID. InCollege.
 ENVIRONMENT DIVISION.
 INPUT-OUTPUT SECTION.
 FILE-CONTROL.
-    SELECT INPUT-FILE ASSIGN TO "InCollege-Input.txt"
+    SELECT INPUT-FILE ASSIGN TO "./src/InCollege-Input.txt"
         ORGANIZATION IS LINE SEQUENTIAL.
-    SELECT OUTPUT-FILE ASSIGN TO "InCollege-Output.txt"
+    SELECT OUTPUT-FILE ASSIGN TO "./src/InCollege-Output.txt"
         ORGANIZATION IS LINE SEQUENTIAL.
-    SELECT ACCOUNT-FILE ASSIGN TO "InCollege-Accounts.txt"
+    SELECT ACCOUNT-FILE ASSIGN TO "./src/InCollege-Accounts.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         FILE STATUS IS acct-file-status.
-    SELECT PROFILE-FILE ASSIGN TO "InCollege-Profiles.txt"
+    SELECT PROFILE-FILE ASSIGN TO "./src/InCollege-Profiles.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         FILE STATUS IS profile-file-status.
-    SELECT CONNECTION-FILE ASSIGN TO "InCollege-Connections.txt"
+    SELECT CONNECTION-FILE ASSIGN TO "./src/InCollege-Connections.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         FILE STATUS IS conn-file-status.
-    SELECT REQUEST-FILE ASSIGN TO "InCollege-Requests.txt"
+    SELECT REQUEST-FILE ASSIGN TO "./src/InCollege-Requests.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         FILE STATUS IS request-file-status.
-    SELECT JOBS-FILE ASSIGN TO "InCollege-Jobs.txt"
+    SELECT JOBS-FILE ASSIGN TO "./src/InCollege-Jobs.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         FILE STATUS IS jobs-file-status.
-    SELECT APPLICATIONS-FILE ASSIGN TO "InCollege-Applications.txt"
+    SELECT APPLICATIONS-FILE ASSIGN TO "./src/InCollege-Applications.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         FILE STATUS IS apps-file-status.
 
@@ -828,11 +828,15 @@ BROWSE-JOBS.
     END-IF
     MOVE FUNCTION NUMVAL(IN-REC) TO job-selection
 
-    IF job-selection > 0 AND job-selection <= job-count
-        PERFORM DISPLAY-JOB-DETAILS
-    ELSE
+    IF job-selection = 0
         MOVE "Returning to job menu." TO msgBuffer
         PERFORM DISPLAY-MSG
+    ELSE IF job-selection > 0 AND job-selection <= job-count
+        PERFORM DISPLAY-JOB-DETAILS
+    ELSE
+        MOVE "Error: Job number does not exist. Please select a valid job number." TO msgBuffer
+        PERFORM DISPLAY-MSG
+        PERFORM BROWSE-JOBS
     END-IF.
 
 DISPLAY-JOB-DETAILS.
