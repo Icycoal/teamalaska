@@ -4,26 +4,26 @@ PROGRAM-ID. InCollege.
 ENVIRONMENT DIVISION.
 INPUT-OUTPUT SECTION.
 FILE-CONTROL.
-    SELECT INPUT-FILE ASSIGN TO "./src/InCollege-Input.txt"
+    SELECT INPUT-FILE ASSIGN TO "InCollege-Input.txt"
         ORGANIZATION IS LINE SEQUENTIAL.
-    SELECT OUTPUT-FILE ASSIGN TO "./src/InCollege-Output.txt"
+    SELECT OUTPUT-FILE ASSIGN TO "InCollege-Output.txt"
         ORGANIZATION IS LINE SEQUENTIAL.
-    SELECT ACCOUNT-FILE ASSIGN TO "./src/InCollege-Accounts.txt"
+    SELECT ACCOUNT-FILE ASSIGN TO "InCollege-Accounts.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         FILE STATUS IS acct-file-status.
-    SELECT PROFILE-FILE ASSIGN TO "./src/InCollege-Profiles.txt"
+    SELECT PROFILE-FILE ASSIGN TO "InCollege-Profiles.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         FILE STATUS IS profile-file-status.
-    SELECT CONNECTION-FILE ASSIGN TO "./src/InCollege-Connections.txt"
+    SELECT CONNECTION-FILE ASSIGN TO "InCollege-Connections.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         FILE STATUS IS conn-file-status.
-    SELECT REQUEST-FILE ASSIGN TO "./src/InCollege-Requests.txt"
+    SELECT REQUEST-FILE ASSIGN TO "InCollege-Requests.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         FILE STATUS IS request-file-status.
-    SELECT JOBS-FILE ASSIGN TO "./src/InCollege-Jobs.txt"
+    SELECT JOBS-FILE ASSIGN TO "InCollege-Jobs.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         FILE STATUS IS jobs-file-status.
-    SELECT APPLICATIONS-FILE ASSIGN TO "./src/InCollege-Applications.txt"
+    SELECT APPLICATIONS-FILE ASSIGN TO "InCollege-Applications.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         FILE STATUS IS apps-file-status.
 
