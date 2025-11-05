@@ -1,1 +1,2 @@
-alice               Pass123!
+user1               Pass123!
+user2               Pass456@
