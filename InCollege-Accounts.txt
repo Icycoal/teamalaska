@@ -1,2 +1,2 @@
-user1               Pass123!
-user2               Pass456@
+multiuser1          Pass321!
+multiuser2          Pass654@

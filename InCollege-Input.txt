@@ -1,43 +1,47 @@
 2
-user1
-Pass123!
+multiuser1
+Pass321!
 2
-user2
-Pass456@
+multiuser2
+Pass654@
 1
-user1
-Pass123!
+multiuser1
+Pass321!
 1
-John
-Doe
-Harvard University
-Computer Science
-2024
-I am a software engineer passionate about technology
+Multi
+User1
+Columbia
+History
+2025
+Multi user 1
 7
 1
-user2
-Pass456@
+multiuser2
+Pass654@
 1
+Multi
 User2
-User2Surname
-USF
-Computer Science
-2025
-I am a coder
+Cornell
+English
+2026
+Multi user 2
 3
-John Doe
+Multi User1
 Y
 7
 1
-user1
-Pass123!
+multiuser1
+Pass321!
 4
 1
 Y
 9
 1
-user2
-Hello! This is my first message to you.
+multiuser2
+First message to test multiple sends.
+1
+multiuser2
+Second message to the same connected user.
+2
 3
 7
