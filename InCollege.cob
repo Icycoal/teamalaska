@@ -23,6 +23,9 @@ FILE-CONTROL.
     SELECT JOBS-FILE ASSIGN TO "InCollege-Jobs.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         FILE STATUS IS jobs-file-status.
+    SELECT APPLICATIONS-FILE ASSIGN TO "InCollege-Applications.txt"
+        ORGANIZATION IS LINE SEQUENTIAL
+        FILE STATUS IS apps-file-status.
 
 DATA DIVISION.
 FILE SECTION.
@@ -51,6 +54,13 @@ FD REQUEST-FILE.
 
 FD JOBS-FILE.
 01 JOB-REC-FILE PIC X(400).
+
+FD APPLICATIONS-FILE.
+01 APP-REC-FILE.
+    05 APP-USER-FILE    PIC X(20).
+    05 APP-JOB-TITLE    PIC X(50).
+    05 APP-EMPLOYER     PIC X(50).
+    05 APP-LOCATION     PIC X(50).
 
 WORKING-STORAGE SECTION.
 01 TARGET-USER   PIC X(20).
@@ -101,12 +111,23 @@ WORKING-STORAGE SECTION.
 01 pending-count PIC 99.
 
 01 jobs-file-status PIC XX.
+01 apps-file-status PIC XX.
 01 jobMenuDoneFlag PIC X.
 01 job-title     PIC X(50).
 01 job-desc      PIC X(200).
 01 job-employer  PIC X(50).
 01 job-location  PIC X(50).
 01 job-salary    PIC X(30).
+
+01 job-count PIC 99 VALUE 0.
+01 job-idx PIC 99.
+01 job-selection PIC 99.
+01 job-details-flag PIC X.
+01 job-apply-flag PIC X.
+
+01 application-count PIC 99 VALUE 0.
+01 app-idx PIC 99.
+01 app-selection PIC 99.
 
 01 accounts.
     05 account-user OCCURS 5 TIMES PIC X(20) VALUE SPACES.
@@ -150,6 +171,24 @@ WORKING-STORAGE SECTION.
 01 skillList.
     05 skillName OCCURS 5 TIMES PIC X(20) VALUE SPACES.
 
+01 job-data.
+    05 job-record OCCURS 10 TIMES.
+        10 job-title-record    PIC X(50).
+        10 job-desc-record     PIC X(200).
+        10 job-employer-record PIC X(50).
+        10 job-location-record PIC X(50).
+        10 job-salary-record   PIC X(30).
+
+01 application-data.
+    05 application-record OCCURS 25 TIMES.
+        10 app-user-record    PIC X(20).
+        10 app-job-title-record PIC X(50).
+        10 app-employer-record  PIC X(50).
+        10 app-location-record  PIC X(50).
+
+01 input-status PIC XX.
+01 temp-input PIC X(201).
+
 PROCEDURE DIVISION.
 START-PROGRAM.
     OPEN INPUT INPUT-FILE
@@ -178,6 +217,18 @@ START-PROGRAM.
     ELSE
         PERFORM LOAD-REQUESTS
     END-IF
+    OPEN INPUT JOBS-FILE
+    IF jobs-file-status = "35"
+        MOVE 0 TO job-count
+    ELSE
+        PERFORM LOAD-JOBS
+    END-IF
+    OPEN INPUT APPLICATIONS-FILE
+    IF apps-file-status = "35"
+        MOVE 0 TO application-count
+    ELSE
+        PERFORM LOAD-APPLICATIONS
+    END-IF
 
     PERFORM SETUP-SKILLS
     PERFORM WELCOME-SCREEN
@@ -187,12 +238,16 @@ START-PROGRAM.
     PERFORM SAVE-PROFILES
     PERFORM SAVE-CONNECTIONS
     PERFORM SAVE-REQUESTS
+    PERFORM SAVE-JOBS
+    PERFORM SAVE-APPLICATIONS
     CLOSE INPUT-FILE
     CLOSE OUTPUT-FILE
     CLOSE ACCOUNT-FILE
     CLOSE PROFILE-FILE
     CLOSE CONNECTION-FILE
     CLOSE REQUEST-FILE
+    CLOSE JOBS-FILE
+    CLOSE APPLICATIONS-FILE
     STOP RUN.
 
 INITIALIZE-PROFILES.
@@ -244,6 +299,31 @@ LOAD-REQUESTS.
         END-READ
     END-PERFORM.
 
+LOAD-JOBS.
+    MOVE 0 TO job-count
+    PERFORM VARYING job-idx FROM 1 BY 1 UNTIL job-idx > 10
+        READ JOBS-FILE
+            AT END EXIT PERFORM
+            NOT AT END
+                ADD 1 TO job-count
+                MOVE JOB-REC-FILE TO job-record(job-idx)
+        END-READ
+    END-PERFORM.
+
+LOAD-APPLICATIONS.
+    MOVE 0 TO application-count
+    PERFORM VARYING app-idx FROM 1 BY 1 UNTIL app-idx > 25
+        READ APPLICATIONS-FILE
+            AT END EXIT PERFORM
+            NOT AT END
+                ADD 1 TO application-count
+                MOVE APP-USER-FILE TO app-user-record(app-idx)
+                MOVE APP-JOB-TITLE TO app-job-title-record(app-idx)
+                MOVE APP-EMPLOYER TO app-employer-record(app-idx)
+                MOVE APP-LOCATION TO app-location-record(app-idx)
+        END-READ
+    END-PERFORM.
+
 SAVE-ACCOUNTS.
     CLOSE ACCOUNT-FILE
     OPEN OUTPUT ACCOUNT-FILE
@@ -288,6 +368,29 @@ SAVE-REQUESTS.
     CLOSE REQUEST-FILE
     OPEN INPUT REQUEST-FILE.
 
+SAVE-JOBS.
+    CLOSE JOBS-FILE
+    OPEN OUTPUT JOBS-FILE
+    PERFORM VARYING job-idx FROM 1 BY 1 UNTIL job-idx > job-count
+        MOVE job-record(job-idx) TO JOB-REC-FILE
+        WRITE JOB-REC-FILE
+    END-PERFORM
+    CLOSE JOBS-FILE
+    OPEN INPUT JOBS-FILE.
+
+SAVE-APPLICATIONS.
+    CLOSE APPLICATIONS-FILE
+    OPEN OUTPUT APPLICATIONS-FILE
+    PERFORM VARYING app-idx FROM 1 BY 1 UNTIL app-idx > application-count
+        MOVE app-user-record(app-idx) TO APP-USER-FILE
+        MOVE app-job-title-record(app-idx) TO APP-JOB-TITLE
+        MOVE app-employer-record(app-idx) TO APP-EMPLOYER
+        MOVE app-location-record(app-idx) TO APP-LOCATION
+        WRITE APP-REC-FILE
+    END-PERFORM
+    CLOSE APPLICATIONS-FILE
+    OPEN INPUT APPLICATIONS-FILE.
+
 SETUP-SKILLS.
     MOVE "Skill1" TO skillName(1)
     MOVE "Skill2" TO skillName(2)
@@ -306,28 +409,35 @@ WELCOME-SCREEN.
     PERFORM DISPLAY-MSG.
 
 READ-INPUT-SAFELY.
+    IF EOF-INPUT-FILE = "Y"
+        EXIT PARAGRAPH
+    END-IF
     READ INPUT-FILE
         AT END
             MOVE "Y" TO EOF-INPUT-FILE
-            MOVE "0" TO IN-REC
+            MOVE SPACES TO IN-REC
         NOT AT END
-            MOVE IN-REC TO debug-input
+            CONTINUE
     END-READ.
 
 MAIN-MENU.
     PERFORM READ-INPUT-SAFELY
-    MOVE FUNCTION NUMVAL(IN-REC) TO mainChoice
-    EVALUATE mainChoice
-        WHEN 1
-            PERFORM LOGIN
-        WHEN 2
-            PERFORM CREATE-ACCOUNT
-        WHEN OTHER
-            MOVE "Y" TO programDoneFlag
-    END-EVALUATE
+    IF EOF-INPUT-FILE = "Y"
+        MOVE "Y" TO programDoneFlag
+    ELSE
+        MOVE FUNCTION NUMVAL(IN-REC) TO mainChoice
+        EVALUATE mainChoice
+            WHEN 1
+                PERFORM LOGIN
+            WHEN 2
+                PERFORM CREATE-ACCOUNT
+            WHEN OTHER
+                MOVE "Y" TO programDoneFlag
+        END-EVALUATE
 
-    IF programDoneFlag NOT = "Y"
-        PERFORM WELCOME-SCREEN
+        IF programDoneFlag NOT = "Y"
+            PERFORM WELCOME-SCREEN
+        END-IF
     END-IF.
 
 CREATE-ACCOUNT.
@@ -339,10 +449,16 @@ CREATE-ACCOUNT.
     MOVE "Enter new username:" TO msgBuffer
     PERFORM DISPLAY-MSG
     PERFORM READ-INPUT-SAFELY
+    IF EOF-INPUT-FILE = "Y"
+        EXIT PARAGRAPH
+    END-IF
     MOVE IN-REC TO userName
     MOVE "Enter new password:" TO msgBuffer
     PERFORM DISPLAY-MSG
     PERFORM READ-INPUT-SAFELY
+    IF EOF-INPUT-FILE = "Y"
+        EXIT PARAGRAPH
+    END-IF
     MOVE IN-REC TO userPass
     MOVE 0 TO passLength
     PERFORM VARYING charPos FROM 1 BY 1 UNTIL charPos > 20
@@ -388,10 +504,16 @@ LOGIN.
         MOVE "Please enter your username:" TO msgBuffer
         PERFORM DISPLAY-MSG
         PERFORM READ-INPUT-SAFELY
+        IF EOF-INPUT-FILE = "Y"
+            EXIT PERFORM
+        END-IF
         MOVE IN-REC TO userName
         MOVE "Please enter your password:" TO msgBuffer
         PERFORM DISPLAY-MSG
         PERFORM READ-INPUT-SAFELY
+        IF EOF-INPUT-FILE = "Y"
+            EXIT PERFORM
+        END-IF
         MOVE IN-REC TO userPass
         MOVE "N" TO foundFlag
         PERFORM VARYING idx FROM 1 BY 1 UNTIL idx > accountCount
@@ -444,26 +566,30 @@ POST-LOGIN-MENU.
         PERFORM DISPLAY-MSG
 
         PERFORM READ-INPUT-SAFELY
-        MOVE FUNCTION NUMVAL(IN-REC) TO mainChoice
+        IF EOF-INPUT-FILE = "Y"
+            MOVE "Y" TO postLoginDoneFlag
+        ELSE
+            MOVE FUNCTION NUMVAL(IN-REC) TO mainChoice
 
-        EVALUATE mainChoice
-            WHEN 1
-                PERFORM CREATE-EDIT-PROFILE
-            WHEN 2
-                PERFORM VIEW-PROFILE
-            WHEN 3
-                PERFORM SEARCH-USER
-            WHEN 4
-                PERFORM VIEW-PENDING-REQUESTS
-            WHEN 5
-                PERFORM SKILL-MENU
-            WHEN 6
-                PERFORM VIEW-MY-NETWORK
-            WHEN 7
-                MOVE "Y" TO postLoginDoneFlag
-            WHEN 8
-                PERFORM JOB-MENU
-        END-EVALUATE
+            EVALUATE mainChoice
+                WHEN 1
+                    PERFORM CREATE-EDIT-PROFILE
+                WHEN 2
+                    PERFORM VIEW-PROFILE
+                WHEN 3
+                    PERFORM SEARCH-USER
+                WHEN 4
+                    PERFORM VIEW-PENDING-REQUESTS
+                WHEN 5
+                    PERFORM SKILL-MENU
+                WHEN 6
+                    PERFORM VIEW-MY-NETWORK
+                WHEN 7
+                    MOVE "Y" TO postLoginDoneFlag
+                WHEN 8
+                    PERFORM JOB-MENU
+            END-EVALUATE
+        END-IF
     END-PERFORM.
 
 CHECK-PENDING-REQUESTS.
@@ -524,12 +650,16 @@ SKILL-MENU.
         MOVE "Enter your choice:" TO msgBuffer
         PERFORM DISPLAY-MSG
         PERFORM READ-INPUT-SAFELY
-        MOVE FUNCTION NUMVAL(IN-REC) TO subChoice
-        IF subChoice >= 1 AND subChoice <= 5
-            MOVE "This skill is under construction." TO msgBuffer
-            PERFORM DISPLAY-MSG
-        ELSE
+        IF EOF-INPUT-FILE = "Y"
             MOVE "Y" TO postLoginDoneFlag
+        ELSE
+            MOVE FUNCTION NUMVAL(IN-REC) TO subChoice
+            IF subChoice >= 1 AND subChoice <= 5
+                MOVE "This skill is under construction." TO msgBuffer
+                PERFORM DISPLAY-MSG
+            ELSE
+                MOVE "Y" TO postLoginDoneFlag
+            END-IF
         END-IF
     END-PERFORM.
 
@@ -542,28 +672,34 @@ JOB-MENU.
         PERFORM DISPLAY-MSG
         MOVE "2. Browse Jobs/Internships" TO msgBuffer
         PERFORM DISPLAY-MSG
-        MOVE "3. Back to Main Menu" TO msgBuffer
+        MOVE "3. View My Applications" TO msgBuffer
+        PERFORM DISPLAY-MSG
+        MOVE "4. Back to Main Menu" TO msgBuffer
         PERFORM DISPLAY-MSG
         MOVE "Enter your choice:" TO msgBuffer
         PERFORM DISPLAY-MSG
 
         PERFORM READ-INPUT-SAFELY
-        MOVE FUNCTION NUMVAL(IN-REC) TO ws-display-idx
+        IF EOF-INPUT-FILE = "Y"
+            MOVE "Y" TO jobMenuDoneFlag
+        ELSE
+            MOVE FUNCTION NUMVAL(IN-REC) TO ws-display-idx
 
-        EVALUATE ws-display-idx
-            WHEN 1
-                PERFORM POST-JOB
-            WHEN 2
-                MOVE "This feature is under construction." TO msgBuffer
-                PERFORM DISPLAY-MSG
-            WHEN 3
-                MOVE "Y" TO jobMenuDoneFlag
-            WHEN OTHER
-                MOVE "Invalid choice." TO msgBuffer
-                PERFORM DISPLAY-MSG
-        END-EVALUATE
+            EVALUATE ws-display-idx
+                WHEN 1
+                    PERFORM POST-JOB
+                WHEN 2
+                    PERFORM BROWSE-JOBS
+                WHEN 3
+                    PERFORM VIEW-MY-APPLICATIONS
+                WHEN 4
+                    MOVE "Y" TO jobMenuDoneFlag
+                WHEN OTHER
+                    MOVE "Invalid choice." TO msgBuffer
+                    PERFORM DISPLAY-MSG
+            END-EVALUATE
+        END-IF
     END-PERFORM.
-
 
 POST-JOB.
     MOVE "--- Post a New Job/Internship ---" TO msgBuffer
@@ -573,21 +709,33 @@ POST-JOB.
     MOVE "Enter Job Title:" TO msgBuffer
     PERFORM DISPLAY-MSG
     PERFORM READ-INPUT-SAFELY
+    IF EOF-INPUT-FILE = "Y"
+        EXIT PARAGRAPH
+    END-IF
     MOVE FUNCTION TRIM(IN-REC) TO job-title
 
     MOVE "Enter Description (max 200 chars):" TO msgBuffer
     PERFORM DISPLAY-MSG
     PERFORM READ-INPUT-SAFELY
+    IF EOF-INPUT-FILE = "Y"
+        EXIT PARAGRAPH
+    END-IF
     MOVE FUNCTION TRIM(IN-REC) TO job-desc
 
     MOVE "Enter Employer Name:" TO msgBuffer
     PERFORM DISPLAY-MSG
     PERFORM READ-INPUT-SAFELY
+    IF EOF-INPUT-FILE = "Y"
+        EXIT PARAGRAPH
+    END-IF
     MOVE FUNCTION TRIM(IN-REC) TO job-employer
 
     MOVE "Enter Location:" TO msgBuffer
     PERFORM DISPLAY-MSG
     PERFORM READ-INPUT-SAFELY
+    IF EOF-INPUT-FILE = "Y"
+        EXIT PARAGRAPH
+    END-IF
     MOVE FUNCTION TRIM(IN-REC) TO job-location
 
     *> Validate required fields BEFORE asking for salary
@@ -608,416 +756,548 @@ POST-JOB.
     MOVE "Enter Salary (optional, enter 'NONE' to skip):" TO msgBuffer
     PERFORM DISPLAY-MSG
     PERFORM READ-INPUT-SAFELY
+    IF EOF-INPUT-FILE = "Y"
+        EXIT PARAGRAPH
+    END-IF
     MOVE FUNCTION TRIM(IN-REC) TO job-salary
     IF FUNCTION TRIM(job-salary) = "NONE"
         MOVE SPACES TO job-salary
     END-IF
 
-    *> Persist only when validation passed
-    OPEN EXTEND JOBS-FILE
-    IF jobs-file-status = "35"
-        OPEN OUTPUT JOBS-FILE
-        CLOSE JOBS-FILE
-        OPEN EXTEND JOBS-FILE
+    *> Add job to in-memory array
+    IF job-count < 10
+        ADD 1 TO job-count
+        MOVE job-title TO job-title-record(job-count)
+        MOVE job-desc TO job-desc-record(job-count)
+        MOVE job-employer TO job-employer-record(job-count)
+        MOVE job-location TO job-location-record(job-count)
+        MOVE job-salary TO job-salary-record(job-count)
+    ELSE
+        MOVE "Maximum job limit reached." TO msgBuffer
+        PERFORM DISPLAY-MSG
+        MOVE "----------------------------------" TO msgBuffer
+        PERFORM DISPLAY-MSG
+        EXIT PARAGRAPH
     END-IF
 
-    MOVE SPACES TO JOB-REC-FILE
-    STRING
-        FUNCTION TRIM(job-title)    DELIMITED BY SIZE
-        "|"                          DELIMITED BY SIZE
-        FUNCTION TRIM(job-desc)     DELIMITED BY SIZE
-        "|"                          DELIMITED BY SIZE
-        FUNCTION TRIM(job-employer) DELIMITED BY SIZE
-        "|"                          DELIMITED BY SIZE
-        FUNCTION TRIM(job-location) DELIMITED BY SIZE
-        "|"                          DELIMITED BY SIZE
-        FUNCTION TRIM(job-salary)   DELIMITED BY SIZE
-        INTO JOB-REC-FILE
-    END-STRING
-    WRITE JOB-REC-FILE
-    CLOSE JOBS-FILE
+    *> Persist to file
+    PERFORM SAVE-JOBS
 
     MOVE "Job posted successfully!" TO msgBuffer
     PERFORM DISPLAY-MSG
     MOVE "----------------------------------" TO msgBuffer
     PERFORM DISPLAY-MSG.
 
+BROWSE-JOBS.
+    MOVE "--- Available Job Listings ---" TO msgBuffer
+    PERFORM DISPLAY-MSG
 
-DISPLAY-MSG.
-    DISPLAY msgBuffer
-    MOVE msgBuffer TO OUT-REC
-    WRITE OUT-REC.
+    IF job-count = 0
+        MOVE "No job listings available." TO msgBuffer
+        PERFORM DISPLAY-MSG
+        MOVE "----------------------------------" TO msgBuffer
+        PERFORM DISPLAY-MSG
+        EXIT PARAGRAPH
+    END-IF
+
+    *> Display job summaries
+    PERFORM VARYING job-idx FROM 1 BY 1 UNTIL job-idx > job-count
+        MOVE SPACES TO msgBuffer
+        STRING
+            job-idx DELIMITED BY SIZE
+            ". " DELIMITED BY SIZE
+            FUNCTION TRIM(job-title-record(job-idx)) DELIMITED BY SIZE
+            " at " DELIMITED BY SIZE
+            FUNCTION TRIM(job-employer-record(job-idx)) DELIMITED BY SIZE
+            " (" DELIMITED BY SIZE
+            FUNCTION TRIM(job-location-record(job-idx)) DELIMITED BY SIZE
+            ")" DELIMITED BY SIZE
+            INTO msgBuffer
+        END-STRING
+        PERFORM DISPLAY-MSG
+    END-PERFORM
+
+    MOVE "----------------------------------" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    MOVE "Enter job number to view details, or 0 to go back:" TO msgBuffer
+    PERFORM DISPLAY-MSG
+
+    PERFORM READ-INPUT-SAFELY
+    IF EOF-INPUT-FILE = "Y"
+        EXIT PARAGRAPH
+    END-IF
+    MOVE FUNCTION NUMVAL(IN-REC) TO job-selection
+
+    IF job-selection = 0
+        MOVE "Returning to job menu." TO msgBuffer
+        PERFORM DISPLAY-MSG
+    ELSE IF job-selection > 0 AND job-selection <= job-count
+        PERFORM DISPLAY-JOB-DETAILS
+    ELSE
+        MOVE "Error: Job number does not exist. Please select a valid job number." TO msgBuffer
+        PERFORM DISPLAY-MSG
+        PERFORM BROWSE-JOBS
+    END-IF.
+
+DISPLAY-JOB-DETAILS.
+    MOVE "--- Job Details ---" TO msgBuffer
+    PERFORM DISPLAY-MSG
+
+    MOVE SPACES TO msgBuffer
+    STRING "Title: " DELIMITED BY SIZE
+           FUNCTION TRIM(job-title-record(job-selection)) DELIMITED BY SIZE
+           INTO msgBuffer
+    END-STRING
+    PERFORM DISPLAY-MSG
+
+    MOVE SPACES TO msgBuffer
+    STRING "Description: " DELIMITED BY SIZE
+           FUNCTION TRIM(job-desc-record(job-selection)) DELIMITED BY SIZE
+           INTO msgBuffer
+    END-STRING
+    PERFORM DISPLAY-MSG
+
+    MOVE SPACES TO msgBuffer
+    STRING "Employer: " DELIMITED BY SIZE
+           FUNCTION TRIM(job-employer-record(job-selection)) DELIMITED BY SIZE
+           INTO msgBuffer
+    END-STRING
+    PERFORM DISPLAY-MSG
+
+    MOVE SPACES TO msgBuffer
+    STRING "Location: " DELIMITED BY SIZE
+           FUNCTION TRIM(job-location-record(job-selection)) DELIMITED BY SIZE
+           INTO msgBuffer
+    END-STRING
+    PERFORM DISPLAY-MSG
+
+    IF FUNCTION TRIM(job-salary-record(job-selection)) NOT = SPACES
+        MOVE SPACES TO msgBuffer
+        STRING "Salary: " DELIMITED BY SIZE
+               FUNCTION TRIM(job-salary-record(job-selection)) DELIMITED BY SIZE
+               INTO msgBuffer
+        END-STRING
+        PERFORM DISPLAY-MSG
+    END-IF
+
+    MOVE "----------------------------------" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    MOVE "1. Apply for this Job" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    MOVE "2. Back to Job List" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    MOVE "Enter your choice:" TO msgBuffer
+    PERFORM DISPLAY-MSG
+
+    PERFORM READ-INPUT-SAFELY
+    IF EOF-INPUT-FILE = "Y"
+        EXIT PARAGRAPH
+    END-IF
+    MOVE FUNCTION NUMVAL(IN-REC) TO subChoice
+
+    EVALUATE subChoice
+        WHEN 1
+            PERFORM APPLY-FOR-JOB
+        WHEN 2
+            PERFORM BROWSE-JOBS
+        WHEN OTHER
+            MOVE "Invalid choice, returning to job list." TO msgBuffer
+            PERFORM DISPLAY-MSG
+            PERFORM BROWSE-JOBS
+    END-EVALUATE.
+
+APPLY-FOR-JOB.
+    *> Check if user already applied for this job
+    MOVE "N" TO foundFlag
+    PERFORM VARYING app-idx FROM 1 BY 1 UNTIL app-idx > application-count
+        IF app-user-record(app-idx) = account-user(loggedInUser) AND
+           app-job-title-record(app-idx) = job-title-record(job-selection) AND
+           app-employer-record(app-idx) = job-employer-record(job-selection)
+            MOVE "Y" TO foundFlag
+        END-IF
+    END-PERFORM
+
+    IF foundFlag = "Y"
+        MOVE "You have already applied for this job." TO msgBuffer
+        PERFORM DISPLAY-MSG
+    ELSE
+        *> Add application
+        IF application-count < 25
+            ADD 1 TO application-count
+            MOVE account-user(loggedInUser) TO app-user-record(application-count)
+            MOVE job-title-record(job-selection) TO app-job-title-record(application-count)
+            MOVE job-employer-record(job-selection) TO app-employer-record(application-count)
+            MOVE job-location-record(job-selection) TO app-location-record(application-count)
+
+            *> Persist to file
+            PERFORM SAVE-APPLICATIONS
+
+            MOVE SPACES TO msgBuffer
+            STRING "Your application for " DELIMITED BY SIZE
+                   FUNCTION TRIM(job-title-record(job-selection)) DELIMITED BY SIZE
+                   " at " DELIMITED BY SIZE
+                   FUNCTION TRIM(job-employer-record(job-selection)) DELIMITED BY SIZE
+                   " has been submitted." DELIMITED BY SIZE
+                   INTO msgBuffer
+            END-STRING
+            PERFORM DISPLAY-MSG
+        ELSE
+            MOVE "Application limit reached. Cannot apply for more jobs." TO msgBuffer
+            PERFORM DISPLAY-MSG
+        END-IF
+    END-IF.
+
+VIEW-MY-APPLICATIONS.
+    MOVE "--- Your Job Applications ---" TO msgBuffer
+    PERFORM DISPLAY-MSG
+
+    MOVE SPACES TO msgBuffer
+    STRING "Application Summary for " DELIMITED BY SIZE
+           FUNCTION TRIM(account-user(loggedInUser)) DELIMITED BY SIZE
+           INTO msgBuffer
+    END-STRING
+    PERFORM DISPLAY-MSG
+
+    MOVE "----------------------------------" TO msgBuffer
+    PERFORM DISPLAY-MSG
+
+    MOVE 0 TO pending-count
+    PERFORM VARYING app-idx FROM 1 BY 1 UNTIL app-idx > application-count
+        IF app-user-record(app-idx) = account-user(loggedInUser)
+            ADD 1 TO pending-count
+
+            MOVE SPACES TO msgBuffer
+            STRING "Job Title: " DELIMITED BY SIZE
+                   FUNCTION TRIM(app-job-title-record(app-idx)) DELIMITED BY SIZE
+                   INTO msgBuffer
+            END-STRING
+            PERFORM DISPLAY-MSG
+
+            MOVE SPACES TO msgBuffer
+            STRING "Employer: " DELIMITED BY SIZE
+                   FUNCTION TRIM(app-employer-record(app-idx)) DELIMITED BY SIZE
+                   INTO msgBuffer
+            END-STRING
+            PERFORM DISPLAY-MSG
+
+            MOVE SPACES TO msgBuffer
+            STRING "Location: " DELIMITED BY SIZE
+                   FUNCTION TRIM(app-location-record(app-idx)) DELIMITED BY SIZE
+                   INTO msgBuffer
+            END-STRING
+            PERFORM DISPLAY-MSG
+
+            MOVE "----------------------------------" TO msgBuffer
+            PERFORM DISPLAY-MSG
+        END-IF
+    END-PERFORM
+
+    IF pending-count = 0
+        MOVE "You have not applied for any jobs yet." TO msgBuffer
+        PERFORM DISPLAY-MSG
+        MOVE "----------------------------------" TO msgBuffer
+        PERFORM DISPLAY-MSG
+    ELSE
+        MOVE SPACES TO msgBuffer
+        STRING "Total applications: " DELIMITED BY SIZE
+               pending-count DELIMITED BY SIZE
+               INTO msgBuffer
+        END-STRING
+        PERFORM DISPLAY-MSG
+        MOVE "----------------------------------" TO msgBuffer
+        PERFORM DISPLAY-MSG
+    END-IF.
 
 CREATE-EDIT-PROFILE.
     MOVE "--- Create/Edit Profile ---" TO msgBuffer
     PERFORM DISPLAY-MSG
+
     MOVE "Enter First Name:" TO msgBuffer
     PERFORM DISPLAY-MSG
     PERFORM READ-INPUT-SAFELY
-    MOVE FUNCTION TRIM(IN-REC) TO first-name(loggedInUser)
+    IF EOF-INPUT-FILE = "Y"
+        EXIT PARAGRAPH
+    END-IF
+    MOVE IN-REC TO first-name(loggedInUser)
+
     MOVE "Enter Last Name:" TO msgBuffer
     PERFORM DISPLAY-MSG
     PERFORM READ-INPUT-SAFELY
-    MOVE FUNCTION TRIM(IN-REC) TO last-name(loggedInUser)
-    MOVE "Enter University/College Attended:" TO msgBuffer
+    IF EOF-INPUT-FILE = "Y"
+        EXIT PARAGRAPH
+    END-IF
+    MOVE IN-REC TO last-name(loggedInUser)
+
+    MOVE "Enter University:" TO msgBuffer
     PERFORM DISPLAY-MSG
     PERFORM READ-INPUT-SAFELY
-    MOVE FUNCTION TRIM(IN-REC) TO university(loggedInUser)
+    IF EOF-INPUT-FILE = "Y"
+        EXIT PARAGRAPH
+    END-IF
+    MOVE IN-REC TO university(loggedInUser)
+
     MOVE "Enter Major:" TO msgBuffer
     PERFORM DISPLAY-MSG
     PERFORM READ-INPUT-SAFELY
-    MOVE FUNCTION TRIM(IN-REC) TO major(loggedInUser)
+    IF EOF-INPUT-FILE = "Y"
+        EXIT PARAGRAPH
+    END-IF
+    MOVE IN-REC TO major(loggedInUser)
+
     MOVE "Enter Graduation Year (YYYY):" TO msgBuffer
     PERFORM DISPLAY-MSG
     PERFORM READ-INPUT-SAFELY
-    MOVE FUNCTION TRIM(IN-REC) TO trimmed-input
-    MOVE trimmed-input(1:4) TO short-trimmed
-    IF short-trimmed IS NUMERIC AND FUNCTION LENGTH(FUNCTION TRIM(short-trimmed)) = 4
-        MOVE FUNCTION NUMVAL(short-trimmed) TO graduation-year(loggedInUser)
-    ELSE
-        MOVE "Invalid year entered." TO msgBuffer
-        PERFORM DISPLAY-MSG
-        MOVE 0 TO graduation-year(loggedInUser)
+    IF EOF-INPUT-FILE = "Y"
+        EXIT PARAGRAPH
     END-IF
-    MOVE "Enter About Me (optional, max 200 chars, enter blank line to skip):" TO msgBuffer
+    MOVE IN-REC TO graduation-year-str
+    MOVE FUNCTION NUMVAL(graduation-year-str) TO graduation-year(loggedInUser)
+
+    MOVE "Enter About Me (max 200 chars):" TO msgBuffer
     PERFORM DISPLAY-MSG
     PERFORM READ-INPUT-SAFELY
-    MOVE FUNCTION TRIM(IN-REC) TO about-me(loggedInUser)
-    MOVE "Add Experience (optional, max 3 entries. Enter 'DONE' to finish):" TO msgBuffer
-    PERFORM DISPLAY-MSG
-    PERFORM VARYING exp-idx FROM 1 BY 1 UNTIL exp-idx > 3
-        MOVE SPACES TO msgBuffer
-        STRING "Experience #" DELIMITED BY SIZE
-               exp-idx DELIMITED BY SIZE
-               " - Title:" DELIMITED BY SIZE
-               INTO msgBuffer
-        END-STRING
-        PERFORM DISPLAY-MSG
-        PERFORM READ-INPUT-SAFELY
-        IF FUNCTION TRIM(IN-REC) = "DONE"
-            MOVE SPACES TO exp-title(loggedInUser, exp-idx)
-            EXIT PERFORM
-        END-IF
-        MOVE FUNCTION TRIM(IN-REC) TO exp-title(loggedInUser, exp-idx)
-        MOVE SPACES TO msgBuffer
-        STRING "Experience #" DELIMITED BY SIZE
-               exp-idx DELIMITED BY SIZE
-               " - Company/Organization:" DELIMITED BY SIZE
-               INTO msgBuffer
-        END-STRING
-        PERFORM DISPLAY-MSG
-        PERFORM READ-INPUT-SAFELY
-        MOVE FUNCTION TRIM(IN-REC) TO exp-company(loggedInUser, exp-idx)
-        MOVE SPACES TO msgBuffer
-        STRING "Experience #" DELIMITED BY SIZE
-               exp-idx DELIMITED BY SIZE
-               " - Dates (e.g., Summer 2024):" DELIMITED BY SIZE
-               INTO msgBuffer
-        END-STRING
-        PERFORM DISPLAY-MSG
-        PERFORM READ-INPUT-SAFELY
-        MOVE FUNCTION TRIM(IN-REC) TO exp-dates(loggedInUser, exp-idx)
-        MOVE SPACES TO msgBuffer
-        STRING "Experience #" DELIMITED BY SIZE
-               exp-idx DELIMITED BY SIZE
-               " - Description (optional, max 100 chars, blank to skip):" DELIMITED BY SIZE
-               INTO msgBuffer
-        END-STRING
-        PERFORM DISPLAY-MSG
-        PERFORM READ-INPUT-SAFELY
-        MOVE FUNCTION TRIM(IN-REC) TO exp-desc(loggedInUser, exp-idx)
-    END-PERFORM
-    MOVE "Add Education (optional, max 3 entries. Enter 'DONE' to finish):" TO msgBuffer
-    PERFORM DISPLAY-MSG
-    PERFORM VARYING edu-idx FROM 1 BY 1 UNTIL edu-idx > 3
-        MOVE SPACES TO msgBuffer
-        STRING "Education #" DELIMITED BY SIZE
-               edu-idx DELIMITED BY SIZE
-               " - Degree:" DELIMITED BY SIZE
-               INTO msgBuffer
-        END-STRING
-        PERFORM DISPLAY-MSG
-        PERFORM READ-INPUT-SAFELY
-        IF FUNCTION TRIM(IN-REC) = "DONE"
-            MOVE SPACES TO edu-degree(loggedInUser, edu-idx)
-            EXIT PERFORM
-        END-IF
-        MOVE FUNCTION TRIM(IN-REC) TO edu-degree(loggedInUser, edu-idx)
-        MOVE SPACES TO msgBuffer
-        STRING "Education #" DELIMITED BY SIZE
-               edu-idx DELIMITED BY SIZE
-               " - University/College:" DELIMITED BY SIZE
-               INTO msgBuffer
-        END-STRING
-        PERFORM DISPLAY-MSG
-        PERFORM READ-INPUT-SAFELY
-        MOVE FUNCTION TRIM(IN-REC) TO edu-university(loggedInUser, edu-idx)
-        MOVE SPACES TO msgBuffer
-        STRING "Education #" DELIMITED BY SIZE
-               edu-idx DELIMITED BY SIZE
-               " - Years Attended (e.g., 2023-2025):" DELIMITED BY SIZE
-               INTO msgBuffer
-        END-STRING
-        PERFORM DISPLAY-MSG
-        PERFORM READ-INPUT-SAFELY
-        MOVE FUNCTION TRIM(IN-REC) TO edu-years(loggedInUser, edu-idx)
-    END-PERFORM
-    MOVE "Profile saved successfully!" TO msgBuffer
+    IF EOF-INPUT-FILE = "Y"
+        EXIT PARAGRAPH
+    END-IF
+    MOVE IN-REC TO about-me(loggedInUser)
+
+    MOVE "Profile updated successfully!" TO msgBuffer
     PERFORM DISPLAY-MSG
     PERFORM SAVE-PROFILES.
 
 VIEW-PROFILE.
-    MOVE "--- Your Profile ---" TO msgBuffer
+    MOVE "--- My Profile ---" TO msgBuffer
     PERFORM DISPLAY-MSG
-    MOVE loggedInUser TO ws-display-idx
-    PERFORM DISPLAY-GENERIC-PROFILE.
+
+    MOVE SPACES TO msgBuffer
+    STRING "Name: " DELIMITED BY SIZE
+           FUNCTION TRIM(first-name(loggedInUser)) DELIMITED BY SIZE
+           " " DELIMITED BY SIZE
+           FUNCTION TRIM(last-name(loggedInUser)) DELIMITED BY SIZE
+           INTO msgBuffer
+    END-STRING
+    PERFORM DISPLAY-MSG
+
+    MOVE SPACES TO msgBuffer
+    STRING "University: " DELIMITED BY SIZE
+           FUNCTION TRIM(university(loggedInUser)) DELIMITED BY SIZE
+           INTO msgBuffer
+    END-STRING
+    PERFORM DISPLAY-MSG
+
+    MOVE SPACES TO msgBuffer
+    STRING "Major: " DELIMITED BY SIZE
+           FUNCTION TRIM(major(loggedInUser)) DELIMITED BY SIZE
+           INTO msgBuffer
+    END-STRING
+    PERFORM DISPLAY-MSG
+
+    MOVE SPACES TO msgBuffer
+    STRING "Graduation Year: " DELIMITED BY SIZE
+           graduation-year(loggedInUser) DELIMITED BY SIZE
+           INTO msgBuffer
+    END-STRING
+    PERFORM DISPLAY-MSG
+
+    MOVE SPACES TO msgBuffer
+    STRING "About Me: " DELIMITED BY SIZE
+           FUNCTION TRIM(about-me(loggedInUser)) DELIMITED BY SIZE
+           INTO msgBuffer
+    END-STRING
+    PERFORM DISPLAY-MSG
+
+    MOVE "----------------------------------" TO msgBuffer
+    PERFORM DISPLAY-MSG.
 
 SEARCH-USER.
-    MOVE "--- Find Someone You Know ---" TO msgBuffer
-    PERFORM DISPLAY-MSG
-    MOVE "Enter the full name of the person you are looking for:"
-        TO msgBuffer
+    MOVE "Enter the first and last name to search:" TO msgBuffer
     PERFORM DISPLAY-MSG
     PERFORM READ-INPUT-SAFELY
+    IF EOF-INPUT-FILE = "Y"
+        EXIT PARAGRAPH
+    END-IF
     MOVE IN-REC TO ws-search-name
+
     MOVE "N" TO search-found-flag
-    MOVE 0 TO ws-display-idx
-    PERFORM VARYING search-idx FROM 1 BY 1
-        UNTIL search-idx > accountCount OR search-found-flag = "Y"
-        MOVE SPACES TO ws-full-name
-        STRING FUNCTION TRIM(first-name(search-idx)) DELIMITED BY SIZE
+    PERFORM VARYING idx FROM 1 BY 1 UNTIL idx > accountCount
+        IF idx = loggedInUser
+            EXIT PERFORM CYCLE
+        END-IF
+
+        STRING FUNCTION TRIM(first-name(idx)) DELIMITED BY SIZE
                " " DELIMITED BY SIZE
-               FUNCTION TRIM(last-name(search-idx)) DELIMITED BY SIZE
+               FUNCTION TRIM(last-name(idx)) DELIMITED BY SIZE
                INTO ws-full-name
         END-STRING
-        IF FUNCTION TRIM(ws-search-name) = FUNCTION TRIM(ws-full-name)
+
+        IF FUNCTION TRIM(ws-full-name) = FUNCTION TRIM(ws-search-name)
             MOVE "Y" TO search-found-flag
-            MOVE search-idx TO ws-display-idx
+            MOVE SPACES TO msgBuffer
+            STRING "User found: " DELIMITED BY SIZE
+                   FUNCTION TRIM(ws-full-name) DELIMITED BY SIZE
+                   INTO msgBuffer
+            END-STRING
+            PERFORM DISPLAY-MSG
+            PERFORM CHECK-CONNECTION-STATUS
+            EXIT PERFORM
         END-IF
     END-PERFORM
-    IF search-found-flag = "Y"
-        PERFORM DISPLAY-GENERIC-PROFILE
 
-        IF ws-display-idx NOT = loggedInUser
-            PERFORM OFFER-CONNECTION-REQUEST
-        END-IF
-    ELSE
-        MOVE "No one by that name could be found." TO msgBuffer
+    IF search-found-flag = "N"
+        MOVE "User not found." TO msgBuffer
         PERFORM DISPLAY-MSG
     END-IF.
 
-OFFER-CONNECTION-REQUEST.
-    MOVE "Would you like to send a connection request? (Y/N):" TO msgBuffer
-    PERFORM DISPLAY-MSG
-
-    PERFORM READ-INPUT-SAFELY
-    IF FUNCTION UPPER-CASE(FUNCTION TRIM(IN-REC)) = "Y"
-        PERFORM SEND-CONNECTION-REQUEST
-    END-IF.
-
-SEND-CONNECTION-REQUEST.
-    MOVE "Y" TO can-send-request
-
-    *> Check in requests file for pending requests
-    PERFORM VARYING conn-check-idx FROM 1 BY 1
-        UNTIL conn-check-idx > request-count
-
-        *> Check if already sent request
-        IF req-sender(conn-check-idx) = account-user(loggedInUser) AND
-           req-receiver(conn-check-idx) = account-user(ws-display-idx)
-            MOVE "You have already sent a connection request to this user." TO msgBuffer
-            PERFORM DISPLAY-MSG
-            MOVE "N" TO can-send-request
-            EXIT PERFORM
-        END-IF
-
-        *> Check if other user already sent request
-        IF req-sender(conn-check-idx) = account-user(ws-display-idx) AND
-           req-receiver(conn-check-idx) = account-user(loggedInUser)
-            MOVE "This user has already sent you a connection request." TO msgBuffer
-            PERFORM DISPLAY-MSG
-            MOVE "N" TO can-send-request
+CHECK-CONNECTION-STATUS.
+    MOVE "N" TO can-send-request
+    MOVE 0 TO conn-idx
+    PERFORM VARYING conn-check-idx FROM 1 BY 1 UNTIL conn-check-idx > connection-count
+        IF (conn-user1(conn-check-idx) = account-user(loggedInUser) AND
+            conn-user2(conn-check-idx) = account-user(idx)) OR
+           (conn-user2(conn-check-idx) = account-user(loggedInUser) AND
+            conn-user1(conn-check-idx) = account-user(idx))
+            MOVE conn-check-idx TO conn-idx
             EXIT PERFORM
         END-IF
     END-PERFORM
 
-    *> Check in connections file for accepted connections
-    IF can-send-request = "Y"
-        PERFORM VARYING conn-check-idx FROM 1 BY 1
-            UNTIL conn-check-idx > connection-count
-
-            IF (conn-user1(conn-check-idx) = account-user(loggedInUser) AND
-                conn-user2(conn-check-idx) = account-user(ws-display-idx) AND
-                conn-status(conn-check-idx) = "A") OR
-               (conn-user1(conn-check-idx) = account-user(ws-display-idx) AND
-                conn-user2(conn-check-idx) = account-user(loggedInUser) AND
-                conn-status(conn-check-idx) = "A")
-                MOVE "You are already connected with this user." TO msgBuffer
-                PERFORM DISPLAY-MSG
-                MOVE "N" TO can-send-request
+    IF conn-idx > 0
+        IF conn-pending(conn-idx)
+            MOVE "Connection request is pending." TO msgBuffer
+            PERFORM DISPLAY-MSG
+        ELSE IF conn-accepted(conn-idx)
+            MOVE "You are already connected." TO msgBuffer
+            PERFORM DISPLAY-MSG
+        END-IF
+    ELSE
+        *> Check if there's already a pending request
+        MOVE "N" TO foundFlag
+        PERFORM VARYING conn-check-idx FROM 1 BY 1 UNTIL conn-check-idx > request-count
+            IF req-sender(conn-check-idx) = account-user(loggedInUser) AND
+               req-receiver(conn-check-idx) = account-user(idx)
+                MOVE "Y" TO foundFlag
                 EXIT PERFORM
             END-IF
         END-PERFORM
-    END-IF
 
-    IF can-send-request = "Y"
-        IF request-count < 25
-            ADD 1 TO request-count
-            MOVE account-user(loggedInUser) TO req-sender(request-count)
-            MOVE account-user(ws-display-idx) TO req-receiver(request-count)
-
-            MOVE "Connection request sent successfully!" TO msgBuffer
+        IF foundFlag = "Y"
+            MOVE "Connection request already sent." TO msgBuffer
             PERFORM DISPLAY-MSG
-            PERFORM SAVE-REQUESTS
         ELSE
-            MOVE "Request limit reached. Cannot send more requests." TO msgBuffer
+            MOVE "Would you like to send a connection request? (Y/N)" TO msgBuffer
             PERFORM DISPLAY-MSG
+            PERFORM READ-INPUT-SAFELY
+            IF EOF-INPUT-FILE = "Y"
+                EXIT PARAGRAPH
+            END-IF
+            IF IN-REC = "Y" OR IN-REC = "y"
+                PERFORM SEND-CONNECTION-REQUEST
+            END-IF
         END-IF
     END-IF.
 
-DISPLAY-GENERIC-PROFILE.
-    IF FUNCTION TRIM(first-name(ws-display-idx)) NOT = SPACES
-        MOVE SPACES TO msgBuffer
-        STRING "Name: " DELIMITED BY SIZE
-               FUNCTION TRIM(first-name(ws-display-idx)) DELIMITED BY SIZE
-               " " DELIMITED BY SIZE
-               FUNCTION TRIM(last-name(ws-display-idx)) DELIMITED BY SIZE
-               INTO msgBuffer
-        END-STRING
-        PERFORM DISPLAY-MSG
-    END-IF
-    IF FUNCTION TRIM(university(ws-display-idx)) NOT = SPACES
-        MOVE SPACES TO msgBuffer
-        STRING "University: " DELIMITED BY SIZE
-               FUNCTION TRIM(university(ws-display-idx)) DELIMITED BY SIZE
-               INTO msgBuffer
-        END-STRING
-        PERFORM DISPLAY-MSG
-    END-IF
-    IF FUNCTION TRIM(major(ws-display-idx)) NOT = SPACES
-        MOVE SPACES TO msgBuffer
-        STRING "Major: " DELIMITED BY SIZE
-               FUNCTION TRIM(major(ws-display-idx)) DELIMITED BY SIZE
-               INTO msgBuffer
-        END-STRING
-        PERFORM DISPLAY-MSG
-    END-IF
-    IF graduation-year(ws-display-idx) > 0
-        MOVE graduation-year(ws-display-idx) TO graduation-year-str
-        MOVE SPACES TO msgBuffer
-        STRING "Graduation Year: " DELIMITED BY SIZE
-               graduation-year-str DELIMITED BY SIZE
-               INTO msgBuffer
-        END-STRING
-        PERFORM DISPLAY-MSG
-    END-IF
-    MOVE "About Me:" TO msgBuffer
-    PERFORM DISPLAY-MSG
-    IF FUNCTION TRIM(about-me(ws-display-idx)) NOT = SPACES
-        MOVE about-me(ws-display-idx) TO msgBuffer
+SEND-CONNECTION-REQUEST.
+    IF request-count < 25
+        ADD 1 TO request-count
+        MOVE account-user(loggedInUser) TO req-sender(request-count)
+        MOVE account-user(idx) TO req-receiver(request-count)
+        PERFORM SAVE-REQUESTS
+        MOVE "Connection request sent!" TO msgBuffer
         PERFORM DISPLAY-MSG
     ELSE
-        MOVE "(Not provided)" TO msgBuffer
+        MOVE "Maximum request limit reached." TO msgBuffer
         PERFORM DISPLAY-MSG
+    END-IF.
+
+PROCESS-PENDING-REQUESTS.
+    IF pending-count > 0
+        MOVE "Enter request number to accept/reject, or 0 to skip:" TO msgBuffer
+        PERFORM DISPLAY-MSG
+        PERFORM READ-INPUT-SAFELY
+        IF EOF-INPUT-FILE = "Y"
+            EXIT PARAGRAPH
+        END-IF
+        MOVE FUNCTION NUMVAL(IN-REC) TO subChoice
+
+        IF subChoice > 0 AND subChoice <= pending-count
+            PERFORM FIND-AND-PROCESS-REQUEST
+        END-IF
+    END-IF.
+
+FIND-AND-PROCESS-REQUEST.
+    MOVE 0 TO conn-idx
+    MOVE 0 TO pending-count
+    PERFORM VARYING conn-check-idx FROM 1 BY 1 UNTIL conn-check-idx > request-count
+        IF req-receiver(conn-check-idx) = account-user(loggedInUser)
+            ADD 1 TO pending-count
+            IF pending-count = subChoice
+                MOVE conn-check-idx TO conn-idx
+                EXIT PERFORM
+            END-IF
+        END-IF
+    END-PERFORM
+
+    IF conn-idx > 0
+        MOVE "Accept this connection request? (Y/N)" TO msgBuffer
+        PERFORM DISPLAY-MSG
+        PERFORM READ-INPUT-SAFELY
+        IF EOF-INPUT-FILE = "Y"
+            EXIT PARAGRAPH
+        END-IF
+        IF IN-REC = "Y" OR IN-REC = "y"
+            PERFORM ACCEPT-CONNECTION-REQUEST
+        ELSE
+            PERFORM REJECT-CONNECTION-REQUEST
+        END-IF
+    END-IF.
+
+ACCEPT-CONNECTION-REQUEST.
+    IF connection-count < 25
+        ADD 1 TO connection-count
+        MOVE req-sender(conn-idx) TO conn-user1(connection-count)
+        MOVE req-receiver(conn-idx) TO conn-user2(connection-count)
+        MOVE "A" TO conn-status(connection-count)
+        PERFORM SAVE-CONNECTIONS
     END-IF
-    MOVE "Experience:" TO msgBuffer
-    PERFORM DISPLAY-MSG
-    PERFORM VARYING exp-idx FROM 1 BY 1 UNTIL exp-idx > 3
-        IF FUNCTION TRIM(exp-title(ws-display-idx, exp-idx)) NOT = SPACES
-            MOVE SPACES TO msgBuffer
-            STRING "  Title: " DELIMITED BY SIZE
-                   FUNCTION TRIM(exp-title(ws-display-idx, exp-idx)) DELIMITED BY SIZE
-                   INTO msgBuffer
-            END-STRING
-            PERFORM DISPLAY-MSG
-            IF FUNCTION TRIM(exp-company(ws-display-idx, exp-idx)) NOT = SPACES
-                MOVE SPACES TO msgBuffer
-                STRING "  Company: " DELIMITED BY SIZE
-                       FUNCTION TRIM(exp-company(ws-display-idx, exp-idx)) DELIMITED BY SIZE
-                       INTO msgBuffer
-                END-STRING
-                PERFORM DISPLAY-MSG
-            END-IF
-            IF FUNCTION TRIM(exp-dates(ws-display-idx, exp-idx)) NOT = SPACES
-                MOVE SPACES TO msgBuffer
-                STRING "  Dates: " DELIMITED BY SIZE
-                       FUNCTION TRIM(exp-dates(ws-display-idx, exp-idx)) DELIMITED BY SIZE
-                       INTO msgBuffer
-                END-STRING
-                PERFORM DISPLAY-MSG
-            END-IF
-            IF FUNCTION TRIM(exp-desc(ws-display-idx, exp-idx)) NOT = SPACES
-                MOVE SPACES TO msgBuffer
-                STRING "  Description: " DELIMITED BY SIZE
-                       FUNCTION TRIM(exp-desc(ws-display-idx, exp-idx)) DELIMITED BY SIZE
-                       INTO msgBuffer
-                END-STRING
-                PERFORM DISPLAY-MSG
-            END-IF
-
-            MOVE " " TO msgBuffer
-            PERFORM DISPLAY-MSG
-        END-IF
-    END-PERFORM
-    MOVE "Education:" TO msgBuffer
-    PERFORM DISPLAY-MSG
-    PERFORM VARYING edu-idx FROM 1 BY 1 UNTIL edu-idx > 3
-        IF FUNCTION TRIM(edu-degree(ws-display-idx, edu-idx)) NOT = SPACES
-            MOVE SPACES TO msgBuffer
-            STRING "  Degree: " DELIMITED BY SIZE
-                   FUNCTION TRIM(edu-degree(ws-display-idx, edu-idx)) DELIMITED BY SIZE
-                   INTO msgBuffer
-            END-STRING
-            PERFORM DISPLAY-MSG
-            IF FUNCTION TRIM(edu-university(ws-display-idx, edu-idx)) NOT = SPACES
-                MOVE SPACES TO msgBuffer
-                STRING "  University: " DELIMITED BY SIZE
-                       FUNCTION TRIM(edu-university(ws-display-idx, edu-idx)) DELIMITED BY SIZE
-                       INTO msgBuffer
-                END-STRING
-                PERFORM DISPLAY-MSG
-            END-IF
-            IF FUNCTION TRIM(edu-years(ws-display-idx, edu-idx)) NOT = SPACES
-                MOVE SPACES TO msgBuffer
-                STRING "  Years: " DELIMITED BY SIZE
-                       FUNCTION TRIM(edu-years(ws-display-idx, edu-idx)) DELIMITED BY SIZE
-                       INTO msgBuffer
-                END-STRING
-                PERFORM DISPLAY-MSG
-            END-IF
-
-            MOVE " " TO msgBuffer
-            PERFORM DISPLAY-MSG
-        END-IF
-    END-PERFORM
-
-    MOVE "------------------" TO msgBuffer
+    PERFORM REMOVE-REQUEST
+    MOVE "Connection request accepted!" TO msgBuffer
     PERFORM DISPLAY-MSG.
 
+REJECT-CONNECTION-REQUEST.
+    PERFORM REMOVE-REQUEST
+    MOVE "Connection request rejected." TO msgBuffer
+    PERFORM DISPLAY-MSG.
+
+REMOVE-REQUEST.
+    PERFORM VARYING conn-check-idx FROM conn-idx BY 1 UNTIL conn-check-idx >= request-count
+        MOVE req-sender(conn-check-idx + 1) TO req-sender(conn-check-idx)
+        MOVE req-receiver(conn-check-idx + 1) TO req-receiver(conn-check-idx)
+    END-PERFORM
+    SUBTRACT 1 FROM request-count
+    PERFORM SAVE-REQUESTS.
+
 VIEW-MY-NETWORK.
-      MOVE "--- Your Network ---" TO msgBuffer
-      PERFORM DISPLAY-MSG
+    MOVE "--- My Network ---" TO msgBuffer
+    PERFORM DISPLAY-MSG
 
-      MOVE 0 TO ws-display-idx
-      MOVE 0 TO pending-count
-
-      PERFORM VARYING conn-idx FROM 1 BY 1 UNTIL conn-idx> connection-count
-          IF conn-status(conn-idx) = "A"
-              MOVE SPACES TO TARGET-USER
-              IF FUNCTION TRIM(conn-user1(conn-idx)) = FUNCTION TRIM(account-user(loggedInUser))
-                MOVE conn-user2(conn-idx) TO TARGET-USER
-            ELSE
-                IF FUNCTION TRIM(conn-user2(conn-idx)) = FUNCTION TRIM(account-user(loggedInUser))
-                    MOVE conn-user1(conn-idx) TO TARGET-USER
-                END-IF
-            END-IF
-
-            IF TARGET-USER NOT = SPACES
-                PERFORM FETCH-USER-NAME
+    MOVE 0 TO pending-count
+    PERFORM VARYING conn-idx FROM 1 BY 1 UNTIL conn-idx > connection-count
+        IF conn-accepted(conn-idx)
+            IF conn-user1(conn-idx) = account-user(loggedInUser)
                 ADD 1 TO pending-count
                 MOVE SPACES TO msgBuffer
-                STRING "Connected with: " DELIMITED BY SIZE
-                       FUNCTION TRIM(USER-FULLNAME) DELIMITED BY SIZE
+                STRING pending-count DELIMITED BY SIZE
+                       ". " DELIMITED BY SIZE
+                       FUNCTION TRIM(conn-user2(conn-idx)) DELIMITED BY SIZE
+                       INTO msgBuffer
+                END-STRING
+                PERFORM DISPLAY-MSG
+            ELSE IF conn-user2(conn-idx) = account-user(loggedInUser)
+                ADD 1 TO pending-count
+                MOVE SPACES TO msgBuffer
+                STRING pending-count DELIMITED BY SIZE
+                       ". " DELIMITED BY SIZE
+                       FUNCTION TRIM(conn-user1(conn-idx)) DELIMITED BY SIZE
                        INTO msgBuffer
                 END-STRING
                 PERFORM DISPLAY-MSG
@@ -1026,107 +1306,13 @@ VIEW-MY-NETWORK.
     END-PERFORM
 
     IF pending-count = 0
-        MOVE "You currently have no established connections." TO msgBuffer
+        MOVE "You have no connections yet." TO msgBuffer
         PERFORM DISPLAY-MSG
     END-IF
 
-    MOVE "--------------------------------------" TO msgBuffer
+    MOVE "----------------------------------" TO msgBuffer
     PERFORM DISPLAY-MSG.
 
-FETCH-USER-NAME.
-    MOVE SPACES TO USER-FULLNAME
-    PERFORM VARYING ws-display-idx FROM 1 BY 1 UNTIL ws-display-idx > accountCount
-        IF FUNCTION TRIM(account-user(ws-display-idx)) = FUNCTION TRIM(TARGET-USER)
-            MOVE SPACES TO msgBuffer
-            STRING
-                FUNCTION TRIM(first-name(ws-display-idx)) DELIMITED BY SIZE
-                " " DELIMITED BY SIZE
-                FUNCTION TRIM(last-name(ws-display-idx)) DELIMITED BY SIZE
-                " (University: " DELIMITED BY SIZE
-                FUNCTION TRIM(university(ws-display-idx)) DELIMITED BY SIZE
-                ", Major: " DELIMITED BY SIZE
-                FUNCTION TRIM(major(ws-display-idx)) DELIMITED BY SIZE
-                ")" DELIMITED BY SIZE
-                INTO USER-FULLNAME
-            END-STRING
-            EXIT PERFORM
-        END-IF
-    END-PERFORM.
-
-PROCESS-PENDING-REQUESTS.
-    PERFORM VARYING conn-idx FROM 1 BY 1 UNTIL conn-idx > request-count
-        IF FUNCTION TRIM(req-receiver(conn-idx)) = FUNCTION TRIM(account-user(loggedInUser))
-            MOVE SPACES TO msgBuffer
-            STRING "Request from: " DELIMITED BY SIZE
-                   FUNCTION TRIM(req-sender(conn-idx)) DELIMITED BY SIZE
-                   " | 1=Accept  2=Reject  3=Skip" DELIMITED BY SIZE
-                   INTO msgBuffer
-            END-STRING
-            PERFORM DISPLAY-MSG
-
-            PERFORM READ-INPUT-SAFELY
-            MOVE FUNCTION TRIM(IN-REC) TO trimmed-input
-            EVALUATE trimmed-input
-                WHEN "1"
-                    PERFORM ACCEPT-THIS-REQUEST
-                WHEN "2"
-                    PERFORM REJECT-THIS-REQUEST
-                WHEN OTHER
-                    CONTINUE
-            END-EVALUATE
-        END-IF
-    END-PERFORM
-
-    *> Persist updates
-    PERFORM SAVE-REQUESTS
-    PERFORM SAVE-CONNECTIONS.
-
-ACCEPT-THIS-REQUEST.
-    MOVE "N" TO foundFlag
-    PERFORM VARYING conn-check-idx FROM 1 BY 1 UNTIL conn-check-idx > connection-count OR foundFlag = "Y"
-        IF (FUNCTION TRIM(conn-user1(conn-check-idx)) = FUNCTION TRIM(account-user(loggedInUser)) AND
-            FUNCTION TRIM(conn-user2(conn-check-idx)) = FUNCTION TRIM(req-sender(conn-idx))) OR
-           (FUNCTION TRIM(conn-user2(conn-check-idx)) = FUNCTION TRIM(account-user(loggedInUser)) AND
-            FUNCTION TRIM(conn-user1(conn-check-idx)) = FUNCTION TRIM(req-sender(conn-idx)))
-            MOVE "Y" TO foundFlag
-        END-IF
-    END-PERFORM
-
-    IF foundFlag = "N"
-        IF connection-count < 25
-            ADD 1 TO connection-count
-            MOVE account-user(loggedInUser) TO conn-user1(connection-count)
-            MOVE req-sender(conn-idx)       TO conn-user2(connection-count)
-            MOVE "A"                        TO conn-status(connection-count)
-        END-IF
-    END-IF
-
-    MOVE SPACES TO msgBuffer
-    STRING "Connection request from " DELIMITED BY SIZE
-           FUNCTION TRIM(req-sender(conn-idx)) DELIMITED BY SIZE
-           " accepted!" DELIMITED BY SIZE
-           INTO msgBuffer
-    END-STRING
-    PERFORM DISPLAY-MSG
-
-    PERFORM DELETE-REQUEST-AT-IDX.
-
-REJECT-THIS-REQUEST.
-    MOVE SPACES TO msgBuffer
-    STRING "Connection request from " DELIMITED BY SIZE
-           FUNCTION TRIM(req-sender(conn-idx)) DELIMITED BY SIZE
-           " rejected." DELIMITED BY SIZE
-           INTO msgBuffer
-    END-STRING
-    PERFORM DISPLAY-MSG
-    PERFORM DELETE-REQUEST-AT-IDX.
-
-DELETE-REQUEST-AT-IDX.
-    PERFORM VARYING ws-display-idx FROM conn-idx BY 1 UNTIL ws-display-idx >= request-count
-        ADD 1 TO temp-year
-        MOVE req-sender(ws-display-idx + 1)   TO req-sender(ws-display-idx)
-        MOVE req-receiver(ws-display-idx + 1) TO req-receiver(ws-display-idx)
-    END-PERFORM
-    SUBTRACT 1 FROM request-count
-    SUBTRACT 1 FROM conn-idx.
-    
+DISPLAY-MSG.
+    DISPLAY msgBuffer
+    WRITE OUT-REC FROM msgBuffer.
