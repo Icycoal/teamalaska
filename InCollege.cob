@@ -26,6 +26,9 @@ FILE-CONTROL.
     SELECT APPLICATIONS-FILE ASSIGN TO "InCollege-Applications.txt"
         ORGANIZATION IS LINE SEQUENTIAL
         FILE STATUS IS apps-file-status.
+    SELECT MESSAGES-FILE ASSIGN TO "InCollege-Messages.txt"
+        ORGANIZATION IS LINE SEQUENTIAL
+        FILE STATUS IS messages-file-status.
 
 DATA DIVISION.
 FILE SECTION.
@@ -61,6 +64,13 @@ FD APPLICATIONS-FILE.
     05 APP-JOB-TITLE    PIC X(50).
     05 APP-EMPLOYER     PIC X(50).
     05 APP-LOCATION     PIC X(50).
+
+FD MESSAGES-FILE.
+01 MSG-REC-FILE.
+    05 MSG-SENDER-FILE     PIC X(20).
+    05 MSG-RECIPIENT-FILE  PIC X(20).
+    05 MSG-CONTENT-FILE    PIC X(200).
+    05 MSG-TIMESTAMP-FILE  PIC X(20).
 
 WORKING-STORAGE SECTION.
 01 TARGET-USER   PIC X(20).
@@ -129,6 +139,16 @@ WORKING-STORAGE SECTION.
 01 app-idx PIC 99.
 01 app-selection PIC 99.
 
+*> MESSAGE SYSTEM VARIABLES
+01 messages-file-status PIC XX.
+01 message-count PIC 99 VALUE 0.
+01 msg-idx PIC 99.
+01 msg-recipient-input PIC X(20).
+01 msg-content-input PIC X(200).
+01 msg-timestamp PIC X(20).
+01 is-connected PIC X.
+01 messagingDoneFlag PIC X.
+
 01 accounts.
     05 account-user OCCURS 5 TIMES PIC X(20) VALUE SPACES.
     05 account-pass OCCURS 5 TIMES PIC X(20) VALUE SPACES.
@@ -167,6 +187,13 @@ WORKING-STORAGE SECTION.
         10 req-receiver PIC X(20).
 
 01 request-count PIC 99 VALUE 0.
+
+01 message-data.
+    05 message-record OCCURS 50 TIMES.
+        10 msg-sender     PIC X(20).
+        10 msg-recipient  PIC X(20).
+        10 msg-content    PIC X(200).
+        10 msg-timestamp-rec PIC X(20).
 
 01 skillList.
     05 skillName OCCURS 5 TIMES PIC X(20) VALUE SPACES.
@@ -229,6 +256,12 @@ START-PROGRAM.
     ELSE
         PERFORM LOAD-APPLICATIONS
     END-IF
+    OPEN INPUT MESSAGES-FILE
+    IF messages-file-status = "35"
+        MOVE 0 TO message-count
+    ELSE
+        PERFORM LOAD-MESSAGES
+    END-IF
 
     PERFORM SETUP-SKILLS
     PERFORM WELCOME-SCREEN
@@ -240,6 +273,7 @@ START-PROGRAM.
     PERFORM SAVE-REQUESTS
     PERFORM SAVE-JOBS
     PERFORM SAVE-APPLICATIONS
+    PERFORM SAVE-MESSAGES
     CLOSE INPUT-FILE
     CLOSE OUTPUT-FILE
     CLOSE ACCOUNT-FILE
@@ -248,6 +282,7 @@ START-PROGRAM.
     CLOSE REQUEST-FILE
     CLOSE JOBS-FILE
     CLOSE APPLICATIONS-FILE
+    CLOSE MESSAGES-FILE
     STOP RUN.
 
 INITIALIZE-PROFILES.
@@ -324,6 +359,20 @@ LOAD-APPLICATIONS.
         END-READ
     END-PERFORM.
 
+LOAD-MESSAGES.
+    MOVE 0 TO message-count
+    PERFORM VARYING msg-idx FROM 1 BY 1 UNTIL msg-idx > 50
+        READ MESSAGES-FILE
+            AT END EXIT PERFORM
+            NOT AT END
+                ADD 1 TO message-count
+                MOVE MSG-SENDER-FILE TO msg-sender(msg-idx)
+                MOVE MSG-RECIPIENT-FILE TO msg-recipient(msg-idx)
+                MOVE MSG-CONTENT-FILE TO msg-content(msg-idx)
+                MOVE MSG-TIMESTAMP-FILE TO msg-timestamp-rec(msg-idx)
+        END-READ
+    END-PERFORM.
+
 SAVE-ACCOUNTS.
     CLOSE ACCOUNT-FILE
     OPEN OUTPUT ACCOUNT-FILE
@@ -390,6 +439,19 @@ SAVE-APPLICATIONS.
     END-PERFORM
     CLOSE APPLICATIONS-FILE
     OPEN INPUT APPLICATIONS-FILE.
+
+SAVE-MESSAGES.
+    CLOSE MESSAGES-FILE
+    OPEN OUTPUT MESSAGES-FILE
+    PERFORM VARYING msg-idx FROM 1 BY 1 UNTIL msg-idx > message-count
+        MOVE msg-sender(msg-idx) TO MSG-SENDER-FILE
+        MOVE msg-recipient(msg-idx) TO MSG-RECIPIENT-FILE
+        MOVE msg-content(msg-idx) TO MSG-CONTENT-FILE
+        MOVE msg-timestamp-rec(msg-idx) TO MSG-TIMESTAMP-FILE
+        WRITE MSG-REC-FILE
+    END-PERFORM
+    CLOSE MESSAGES-FILE
+    OPEN INPUT MESSAGES-FILE.
 
 SETUP-SKILLS.
     MOVE "Skill1" TO skillName(1)
@@ -564,6 +626,8 @@ POST-LOGIN-MENU.
         PERFORM DISPLAY-MSG
         MOVE "8. Job Search/Internship" TO msgBuffer
         PERFORM DISPLAY-MSG
+        MOVE "9. Messages" TO msgBuffer
+        PERFORM DISPLAY-MSG
 
         PERFORM READ-INPUT-SAFELY
         IF EOF-INPUT-FILE = "Y"
@@ -588,9 +652,133 @@ POST-LOGIN-MENU.
                     MOVE "Y" TO postLoginDoneFlag
                 WHEN 8
                     PERFORM JOB-MENU
+                WHEN 9
+                    PERFORM MESSAGING-MENU
             END-EVALUATE
         END-IF
     END-PERFORM.
+
+MESSAGING-MENU.
+    MOVE "N" TO messagingDoneFlag
+    PERFORM UNTIL messagingDoneFlag = "Y"
+        MOVE "--- Messages ---" TO msgBuffer
+        PERFORM DISPLAY-MSG
+        MOVE "1. Send a New Message" TO msgBuffer
+        PERFORM DISPLAY-MSG
+        MOVE "2. View My Messages" TO msgBuffer
+        PERFORM DISPLAY-MSG
+        MOVE "3. Back to Main Menu" TO msgBuffer
+        PERFORM DISPLAY-MSG
+        MOVE "Enter your choice:" TO msgBuffer
+        PERFORM DISPLAY-MSG
+
+        PERFORM READ-INPUT-SAFELY
+        IF EOF-INPUT-FILE = "Y"
+            MOVE "Y" TO messagingDoneFlag
+        ELSE
+            MOVE FUNCTION NUMVAL(IN-REC) TO subChoice
+
+            EVALUATE subChoice
+                WHEN 1
+                    PERFORM SEND-MESSAGE
+                WHEN 2
+                    PERFORM VIEW-MESSAGES
+                WHEN 3
+                    MOVE "Y" TO messagingDoneFlag
+                WHEN OTHER
+                    MOVE "Invalid choice." TO msgBuffer
+                    PERFORM DISPLAY-MSG
+            END-EVALUATE
+        END-IF
+    END-PERFORM.
+
+SEND-MESSAGE.
+    MOVE "--- Send a New Message ---" TO msgBuffer
+    PERFORM DISPLAY-MSG
+
+    MOVE "Enter recipient username:" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    PERFORM READ-INPUT-SAFELY
+    IF EOF-INPUT-FILE = "Y"
+        EXIT PARAGRAPH
+    END-IF
+    MOVE IN-REC TO msg-recipient-input
+
+    *> Validate that recipient exists
+    MOVE "N" TO foundFlag
+    PERFORM VARYING idx FROM 1 BY 1 UNTIL idx > accountCount
+        IF FUNCTION TRIM(account-user(idx)) = FUNCTION TRIM(msg-recipient-input)
+            MOVE "Y" TO foundFlag
+            EXIT PERFORM
+        END-IF
+    END-PERFORM
+
+    IF foundFlag = "N"
+        MOVE "User not found in your network." TO msgBuffer
+        PERFORM DISPLAY-MSG
+        EXIT PARAGRAPH
+    END-IF
+
+    *> Check if recipient is the logged-in user
+    IF FUNCTION TRIM(msg-recipient-input) = FUNCTION TRIM(account-user(loggedInUser))
+        MOVE "You cannot send a message to yourself." TO msgBuffer
+        PERFORM DISPLAY-MSG
+        EXIT PARAGRAPH
+    END-IF
+
+    *> Validate connection with recipient
+    MOVE "N" TO is-connected
+    PERFORM VARYING conn-idx FROM 1 BY 1 UNTIL conn-idx > connection-count
+        IF conn-accepted(conn-idx)
+            IF (FUNCTION TRIM(conn-user1(conn-idx)) = FUNCTION TRIM(account-user(loggedInUser)) AND
+                FUNCTION TRIM(conn-user2(conn-idx)) = FUNCTION TRIM(msg-recipient-input)) OR
+               (FUNCTION TRIM(conn-user2(conn-idx)) = FUNCTION TRIM(account-user(loggedInUser)) AND
+                FUNCTION TRIM(conn-user1(conn-idx)) = FUNCTION TRIM(msg-recipient-input))
+                MOVE "Y" TO is-connected
+                EXIT PERFORM
+            END-IF
+        END-IF
+    END-PERFORM
+
+    IF is-connected = "N"
+        MOVE "You can only message users you are connected with." TO msgBuffer
+        PERFORM DISPLAY-MSG
+        EXIT PARAGRAPH
+    END-IF
+
+    *> Get message content
+    MOVE "Enter your message:" TO msgBuffer
+    PERFORM DISPLAY-MSG
+    PERFORM READ-INPUT-SAFELY
+    IF EOF-INPUT-FILE = "Y"
+        EXIT PARAGRAPH
+    END-IF
+    MOVE IN-REC TO msg-content-input
+
+    IF FUNCTION TRIM(msg-content-input) = SPACES
+        MOVE "Message cannot be empty." TO msgBuffer
+        PERFORM DISPLAY-MSG
+        EXIT PARAGRAPH
+    END-IF
+
+    *> Save message with timestamp
+    IF message-count < 50
+        ADD 1 TO message-count
+        MOVE account-user(loggedInUser) TO msg-sender(message-count)
+        MOVE msg-recipient-input TO msg-recipient(message-count)
+        MOVE msg-content-input TO msg-content(message-count)
+        MOVE FUNCTION CURRENT-DATE TO msg-timestamp-rec(message-count)
+        PERFORM SAVE-MESSAGES
+        MOVE "Message sent successfully!" TO msgBuffer
+        PERFORM DISPLAY-MSG
+    ELSE
+        MOVE "Message limit reached." TO msgBuffer
+        PERFORM DISPLAY-MSG
+    END-IF.
+
+VIEW-MESSAGES.
+    MOVE "This feature is under construction." TO msgBuffer
+    PERFORM DISPLAY-MSG.
 
 CHECK-PENDING-REQUESTS.
     MOVE 0 TO pending-count

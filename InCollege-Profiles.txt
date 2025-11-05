@@ -1,1 +1,2 @@
-
+John                Doe                 Harvard University                                Computer Science                                  2024I am a software engineer passionate about technology
+User2               User2Surname        USF                                               Computer Science                                  2025I am a coder
