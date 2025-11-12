@@ -151,7 +151,53 @@ Message sent successfully!
 2. View My Messages
 3. Back to Main Menu
 Enter your choice:
-This feature is under construction.
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for User
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. View My Network
+7. Go Back
+8. Job Search/Internship
+9. Messages
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
+Please enter your username:
+Please enter your password:
+You have successfully logged in.
+Welcome, multiuser2!
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for User
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. View My Network
+7. Go Back
+8. Job Search/Internship
+9. Messages
+--- Messages ---
+1. Send a New Message
+2. View My Messages
+3. Back to Main Menu
+Enter your choice:
+--- Your Messages ---
+From: multiuser1s ---
+Message: First message to test multiple sends.
+(Sent: 2025111215142205-050)st multiple sends.
+---
+From: multiuser1
+Message: Second message to the same connected user.
+(Sent: 2025111215142205-050)he same connected user.
+---
+---------------------
+--- Messages ---
+1. Send a New Message
+2. View My Messages
+3. Back to Main Menu
+Enter your choice:
+Invalid choice.
 --- Messages ---
 1. Send a New Message
 2. View My Messages
