@@ -777,8 +777,52 @@ SEND-MESSAGE.
     END-IF.
 
 VIEW-MESSAGES.
-    MOVE "This feature is under construction." TO msgBuffer
+    MOVE "--- Your Messages ---" TO msgBuffer
+    PERFORM DISPLAY-MSG
+
+    MOVE 0 TO pending-count  *> reuse as "found" counter
+
+    PERFORM VARYING msg-idx FROM 1 BY 1 UNTIL msg-idx > message-count
+        IF FUNCTION TRIM(msg-recipient(msg-idx)) =
+           FUNCTION TRIM(account-user(loggedInUser))
+
+            ADD 1 TO pending-count
+
+            STRING "From: " DELIMITED BY SIZE
+                   FUNCTION TRIM(msg-sender(msg-idx)) DELIMITED BY SIZE
+                   INTO msgBuffer
+            END-STRING
+            PERFORM DISPLAY-MSG
+
+            STRING "Message: " DELIMITED BY SIZE
+                   FUNCTION TRIM(msg-content(msg-idx)) DELIMITED BY SIZE
+                   INTO msgBuffer
+            END-STRING
+            PERFORM DISPLAY-MSG
+
+            IF FUNCTION LENGTH(FUNCTION TRIM(msg-timestamp-rec(msg-idx))) > 0
+                STRING "(Sent: " DELIMITED BY SIZE
+                       FUNCTION TRIM(msg-timestamp-rec(msg-idx)) DELIMITED BY SIZE
+                       ")" DELIMITED BY SIZE
+                       INTO msgBuffer
+                END-STRING
+                PERFORM DISPLAY-MSG
+            END-IF
+
+            MOVE "---" TO msgBuffer
+            PERFORM DISPLAY-MSG
+
+        END-IF
+    END-PERFORM
+
+    IF pending-count = 0
+        MOVE "You have no messages at this time." TO msgBuffer
+        PERFORM DISPLAY-MSG
+    END-IF
+
+    MOVE "---------------------" TO msgBuffer
     PERFORM DISPLAY-MSG.
+
 
 CHECK-PENDING-REQUESTS.
     MOVE 0 TO pending-count
