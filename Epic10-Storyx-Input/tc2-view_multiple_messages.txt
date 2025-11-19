@@ -1,0 +1,19 @@
+1
+SendingUser
+Spass!23
+9
+1
+ReceivingUser
+Msg A
+1
+ReceivingUser
+Msg B
+3
+7
+1
+ReceivingUser
+Rpass!23
+9
+2
+3
+7

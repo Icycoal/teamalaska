@@ -1,0 +1,46 @@
+2
+user9
+Password123!
+1
+user9
+Password123!
+8
+1
+UX Designer
+User research and prototyping
+DesignStudio
+Miami, FL
+75000
+8
+1
+QA Engineer
+Test automation and quality assurance
+QualityFirst
+Phoenix, AZ
+70000
+8
+1
+Sales Representative
+B2B software sales
+SalesPro
+Dallas, TX
+60000
+8
+2
+1
+1
+8
+2
+2
+1
+8
+2
+3
+1
+8
+2
+0
+8
+3
+4
+7

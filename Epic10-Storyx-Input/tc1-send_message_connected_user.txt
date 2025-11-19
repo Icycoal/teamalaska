@@ -1,0 +1,44 @@
+2
+sender1
+Pass123!
+2
+receiver1
+Pass456@
+1
+sender1
+Pass123!
+1
+Sender
+One
+MIT
+Software Engineering
+2025
+I am the sender user
+7
+1
+receiver1
+Pass456@
+1
+Receiver
+One
+Stanford
+Computer Science
+2026
+I am the receiver user
+3
+Sender One
+Y
+7
+1
+sender1
+Pass123!
+4
+1
+Y
+9
+1
+receiver1
+Hello! This is a test message from sender1 to receiver1.
+2
+3
+7

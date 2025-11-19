@@ -1,0 +1,85 @@
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
+Please enter your username:
+Please enter your password:
+You have successfully logged in.
+Welcome, ReceiverP!
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for User
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. View My Network
+7. Go Back
+8. Job Search/Internship
+9. Messages
+--- Messages ---
+1. Send a New Message
+2. View My Messages
+3. Back to Main Menu
+Enter your choice:
+--- Your Messages ---
+From: SenderPages ---
+Message: Persist hello
+(Sent: 2025111214490446+000)
+---
+---------------------
+--- Messages ---
+1. Send a New Message
+2. View My Messages
+3. Back to Main Menu
+Enter your choice:
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for User
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. View My Network
+7. Go Back
+8. Job Search/Internship
+9. Messages
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:
+Please enter your username:
+Please enter your password:
+You have successfully logged in.
+Welcome, NoMsgUser!
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for User
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. View My Network
+7. Go Back
+8. Job Search/Internship
+9. Messages
+--- Messages ---
+1. Send a New Message
+2. View My Messages
+3. Back to Main Menu
+Enter your choice:
+--- Your Messages ---
+You have no messages at this time.
+---------------------
+--- Messages ---
+1. Send a New Message
+2. View My Messages
+3. Back to Main Menu
+Enter your choice:
+1. Create/Edit My Profile
+2. View My Profile
+3. Search for User
+4. View My Pending Connection Requests
+5. Learn a New Skill
+6. View My Network
+7. Go Back
+8. Job Search/Internship
+9. Messages
+Welcome to InCollege!
+1. Log In
+2. Create New Account
+Enter your choice:

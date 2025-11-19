@@ -1,0 +1,18 @@
+2
+johndoe1
+P@ssw0rd!
+1
+johndoe1
+P@ssw0rd!
+1
+John
+Doe1
+Tech University
+Computer Engineering
+2024
+First John Doe variant.
+DONE
+DONE
+3
+John Doe2
+5

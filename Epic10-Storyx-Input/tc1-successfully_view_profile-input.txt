@@ -1,0 +1,24 @@
+2
+alice
+P@ssw0rd!
+1
+alice
+P@ssw0rd!
+1
+Alice
+Wonder
+Fictional University
+Mathematics
+2024
+Enjoys problem-solving and teaching.
+Research Assistant
+Math Dept
+Fall 2023
+Worked on numerical analysis research.
+DONE
+Bachelor of Arts
+Fictional University
+2020-2024
+DONE
+2
+5
